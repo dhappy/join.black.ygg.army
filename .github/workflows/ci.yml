@@ -40,6 +40,21 @@ jobs:
       - run: forge build --root test-contracts
       - run: pnpm run test:integration
 
+  e2e-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm exec playwright test e2e/invalid-link.e2e.ts
+
   # End-to-end tests need a deployed registrar, Paymaster, bundler, and the PUBLIC_* config
   # supplied as repo variables/secrets. Disabled until that infrastructure exists (T009a).
   # Enable by setting repository variable RUN_E2E=true and providing the values below.

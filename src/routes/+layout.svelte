@@ -5,6 +5,7 @@
 </script>
 
 <svelte:head>
+	<title>Claim your name · black.ygg.army</title>
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
