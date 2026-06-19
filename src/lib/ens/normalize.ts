@@ -21,3 +21,11 @@ export function normalizeLabel(input: string): NormalizedLabel {
 export function fullyQualifiedName(label: string, postfix: string): string {
 	return `${label}.${postfix}`;
 }
+
+// The fully-qualified preview shown to the claimant before submission, or '' when the label is
+// empty or does not normalize (FR-003).
+export function previewName(label: string, postfix: string): string {
+	if (label.length === 0) return '';
+	const result = normalizeLabel(label);
+	return result.ok ? fullyQualifiedName(result.normalized, postfix) : '';
+}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { normalizeLabel } from '$lib/ens/normalize';
+	import { normalizeLabel, previewName } from '$lib/ens/normalize';
 	import { validateAddress } from '$lib/ens/address';
 
 	let { onsubmit, postfix }: { onsubmit: (label: string, address: string) => void; postfix: string } =
@@ -10,11 +10,7 @@
 	let labelError = $state('');
 	let addressError = $state('');
 
-	const preview = $derived.by(() => {
-		if (label.length === 0) return '';
-		const result = normalizeLabel(label);
-		return result.ok ? `${result.normalized}.${postfix}` : '';
-	});
+	const preview = $derived(previewName(label, postfix));
 
 	function handleSubmit(event: SubmitEvent) {
 		event.preventDefault();

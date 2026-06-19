@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { parseClaimLink } from '$lib/claim/link';
+	import { parseClaimLink, stripFragment } from '$lib/claim/link';
 	import { createClaimSession } from '$lib/claim/session.svelte';
 	import { readWhitelist } from '$lib/registrar/reads';
 	import { registerName } from '$lib/claim/register';
@@ -25,7 +25,7 @@
 		}
 		const parsed = parseClaimLink(window.location.hash);
 		// Remove the key from the address bar / history without navigating away.
-		history.replaceState(null, '', window.location.pathname + window.location.search);
+		history.replaceState(null, '', stripFragment(window.location.href));
 		session.fromLink(parsed);
 		if (parsed.ok) {
 			try {

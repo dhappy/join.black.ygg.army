@@ -27,6 +27,13 @@ export function extractKeyParam(hash: string): string | null {
 	return new URLSearchParams(raw).get('k');
 }
 
+// Return the href with its fragment removed, so the key can be cleared from the address bar /
+// history without navigating (FR-010, contracts/claim-link.md).
+export function stripFragment(href: string): string {
+	const index = href.indexOf('#');
+	return index === -1 ? href : href.slice(0, index);
+}
+
 export function parseClaimLink(hash: string): ParsedClaimLink {
 	const encoded = extractKeyParam(hash);
 	if (!encoded) return { ok: false, reason: 'missing' };

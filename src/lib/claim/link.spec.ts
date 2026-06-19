@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { hexToBytes } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { parseClaimLink, toBase64Url } from './link';
+import { parseClaimLink, stripFragment, toBase64Url } from './link';
 
 // A well-known test private key (Hardhat account #1); its address is derived, not hardcoded.
 const KEY_HEX = '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d' as const;
@@ -29,5 +29,17 @@ describe('parseClaimLink', () => {
 	it('reports malformed when the key is not 32 bytes', () => {
 		const short = toBase64Url(new Uint8Array(31));
 		expect(parseClaimLink(`#k=${short}`)).toEqual({ ok: false, reason: 'malformed' });
+	});
+});
+
+describe('stripFragment', () => {
+	it('removes the fragment (and the key) from an href', () => {
+		expect(stripFragment('https://join.black.ygg.army/?a=1#k=secret')).toBe(
+			'https://join.black.ygg.army/?a=1'
+		);
+	});
+
+	it('leaves an href without a fragment unchanged', () => {
+		expect(stripFragment('https://join.black.ygg.army/')).toBe('https://join.black.ygg.army/');
 	});
 });
