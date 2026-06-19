@@ -39,4 +39,4 @@ export const registrarAbi = [
 			{ name: 'registrant', type: 'address', indexed: true }
 		]
 	}
-] as const;
+] as const

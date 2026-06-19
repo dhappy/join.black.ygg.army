@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from 'vitest/config'
 
 // Integration tests run against a local Anvil node with a freshly deployed MockRegistrar
 // (see tests/integration/globalSetup.ts). Kept separate from the unit projects in vite.config.ts.
@@ -9,4 +9,4 @@ export default defineConfig({
 		testTimeout: 30000,
 		hookTimeout: 60000
 	}
-});
+})

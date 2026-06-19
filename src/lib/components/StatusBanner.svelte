@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { ClaimState } from '$lib/claim/state';
+	import type { ClaimState } from '$lib/claim/state'
 
-	let { state }: { state: ClaimState } = $props();
+	let { state }: { state: ClaimState } = $props()
 
 	const messages: Record<ClaimState['kind'], string> = {
 		LoadingLink: 'Checking your invitation…',
@@ -14,7 +14,7 @@
 		Pending: 'Waiting for confirmation…',
 		Success: 'Your name is registered.',
 		Failed: 'Something went wrong.'
-	};
+	}
 </script>
 
 <p role="status" aria-live="polite">{messages[state.kind]}</p>

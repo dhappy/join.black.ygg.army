@@ -2,50 +2,50 @@
 // server with the deployment baked into PUBLIC_* config. Used as the Playwright webServer.
 // Covers the non-submission flows (NotAuthorized / AlreadyRedeemed / form validation); the gasless
 // success path needs a real bundler + Paymaster and is out of scope here.
-import { spawn, spawnSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
-import { createPublicClient, createWalletClient, http } from 'viem';
-import { privateKeyToAccount } from 'viem/accounts';
-import { foundry } from 'viem/chains';
+import { spawn, spawnSync } from 'node:child_process'
+import { existsSync, readFileSync } from 'node:fs'
+import { createPublicClient, createWalletClient, http } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+import { foundry } from 'viem/chains'
 
-const RPC = 'http://127.0.0.1:8545';
-const ARTIFACT = 'test-contracts/out/MockRegistrar.sol/MockRegistrar.json';
-const NAME = 'MockRegistrar';
-const VERSION = '1';
-const POSTFIX = 'black.ygg.army';
-const TARGET = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045';
+const RPC = 'http://127.0.0.1:8545'
+const ARTIFACT = 'test-contracts/out/MockRegistrar.sol/MockRegistrar.json'
+const NAME = 'MockRegistrar'
+const VERSION = '1'
+const POSTFIX = 'black.ygg.army'
+const TARGET = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045'
 
 // Anvil default accounts (well-known): [0] deployer/relayer, [1] whitelisted+unused (Ready),
 // [2] whitelisted then consumed (AlreadyRedeemed), [3] never whitelisted (NotAuthorized).
-const DEPLOYER = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
-const READY_KEY = '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d';
-const USED_KEY = '0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a';
+const DEPLOYER = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+const READY_KEY = '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d'
+const USED_KEY = '0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a'
 
-let anvil;
-let vite;
+let anvil
+let vite
 
 function shutdown() {
-	if (anvil) anvil.kill();
-	if (vite) vite.kill();
-	process.exit(0);
+	if (anvil) anvil.kill()
+	if (vite) vite.kill()
+	process.exit(0)
 }
-process.on('SIGTERM', shutdown);
-process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown)
+process.on('SIGINT', shutdown)
 
 if (!existsSync(ARTIFACT)) {
-	spawnSync('forge', ['build', '--root', 'test-contracts'], { stdio: 'inherit' });
+	spawnSync('forge', ['build', '--root', 'test-contracts'], { stdio: 'inherit' })
 }
-const artifact = JSON.parse(readFileSync(ARTIFACT, 'utf8'));
+const artifact = JSON.parse(readFileSync(ARTIFACT, 'utf8'))
 
-anvil = spawn('anvil', ['--silent'], { stdio: 'ignore' });
+anvil = spawn('anvil', ['--silent'], { stdio: 'ignore' })
 
-const publicClient = createPublicClient({ chain: foundry, transport: http(RPC) });
+const publicClient = createPublicClient({ chain: foundry, transport: http(RPC) })
 for (let attempt = 0; attempt < 100; attempt++) {
 	try {
-		await publicClient.getChainId();
-		break;
+		await publicClient.getChainId()
+		break
 	} catch {
-		await new Promise((done) => setTimeout(done, 100));
+		await new Promise((done) => setTimeout(done, 100))
 	}
 }
 
@@ -53,14 +53,14 @@ const wallet = createWalletClient({
 	account: privateKeyToAccount(DEPLOYER),
 	chain: foundry,
 	transport: http(RPC)
-});
+})
 
 const deployHash = await wallet.deployContract({
 	abi: artifact.abi,
 	bytecode: artifact.bytecode.object,
 	args: [NAME, VERSION]
-});
-const registrar = (await publicClient.waitForTransactionReceipt({ hash: deployHash })).contractAddress;
+})
+const registrar = (await publicClient.waitForTransactionReceipt({ hash: deployHash })).contractAddress
 
 for (const key of [READY_KEY, USED_KEY]) {
 	const hash = await wallet.writeContract({
@@ -68,8 +68,8 @@ for (const key of [READY_KEY, USED_KEY]) {
 		abi: artifact.abi,
 		functionName: 'allow',
 		args: [privateKeyToAccount(key).address]
-	});
-	await publicClient.waitForTransactionReceipt({ hash });
+	})
+	await publicClient.waitForTransactionReceipt({ hash })
 }
 
 // Consume the USED key's whitelist entry so it reports used=true (AlreadyRedeemed).
@@ -78,14 +78,14 @@ const usedSignature = await privateKeyToAccount(USED_KEY).signTypedData({
 	types: { Registration: [{ name: 'label', type: 'string' }, { name: 'target', type: 'address' }] },
 	primaryType: 'Registration',
 	message: { label: 'taken', target: TARGET }
-});
+})
 const consumeHash = await wallet.writeContract({
 	address: registrar,
 	abi: artifact.abi,
 	functionName: 'register',
 	args: ['taken', TARGET, usedSignature]
-});
-await publicClient.waitForTransactionReceipt({ hash: consumeHash });
+})
+await publicClient.waitForTransactionReceipt({ hash: consumeHash })
 
 // Build with the deployment baked into PUBLIC_* config ($env/dynamic/public is snapshot into the
 // static build), then serve via `vite preview`. (`vite dev` is avoided — heavier and flaky under
@@ -101,8 +101,8 @@ const buildEnv = {
 	PUBLIC_ENTRYPOINT_ADDRESS: '0x0000000071727De22E5E9d8BAf0edAc6f37da032',
 	PUBLIC_BUNDLER_URL: 'http://127.0.0.1:9/bundler',
 	PUBLIC_PAYMASTER_URL: 'http://127.0.0.1:9/paymaster'
-};
-spawnSync('pnpm', ['exec', 'vite', 'build'], { stdio: 'inherit', env: buildEnv });
+}
+spawnSync('pnpm', ['exec', 'vite', 'build'], { stdio: 'inherit', env: buildEnv })
 vite = spawn('pnpm', ['exec', 'vite', 'preview', '--port', '6666', '--host', '127.0.0.1'], {
 	stdio: 'ignore'
-});
+})

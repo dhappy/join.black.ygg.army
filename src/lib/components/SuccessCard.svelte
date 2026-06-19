@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { Address } from 'viem';
+	import type { Address } from 'viem'
 
-	let { fqName, target }: { fqName: string; target: Address } = $props();
+	let { fqName, target }: { fqName: string, target: Address } = $props()
 </script>
 
 <section role="status" aria-live="polite">
