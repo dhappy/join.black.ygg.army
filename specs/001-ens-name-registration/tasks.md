@@ -48,13 +48,13 @@ under `tests/`, at repository root (per plan.md Structure Decision).
 - [X] T008 [P] Implement the viem public client (from config) in `src/lib/chain/client.ts`
 - [X] T009 [P] Implement claim-link parsing (base64url-decode `k` → 32-byte secp256k1 key → derive `signerAddress`; reject malformed) in `src/lib/claim/link.ts` per `contracts/claim-link.md`
 - [ ] T009a Confirm the deployed registrar's ABI, `Registered` event, and EIP-712 domain (name/version/chainId/verifyingContract) with the contract owner; reconcile `contracts/registrar-interface.md` and fail the phase if unavailable
-- [ ] T010 [P] Define the registrar ABI and typed bindings in `src/lib/registrar/abi.ts` per `contracts/registrar-interface.md`
-- [ ] T011 [P] Implement the EIP-712 `Registration` typed-data builder in `src/lib/registrar/typedData.ts` (domain bound to registrar address + chainId)
+- [X] T010 [P] Define the registrar ABI and typed bindings in `src/lib/registrar/abi.ts` per `contracts/registrar-interface.md`
+- [X] T011 [P] Implement the EIP-712 `Registration` typed-data builder in `src/lib/registrar/typedData.ts` (domain bound to registrar address + chainId)
 - [X] T012 [P] Implement ENSIP-15 label normalization + fully-qualified-name assembly in `src/lib/ens/normalize.ts`
 - [X] T013 [P] Implement EVM address validation in `src/lib/ens/address.ts`
-- [ ] T014 [P] Implement the ERC-4337 account/bundler/Paymaster client (permissionless): build counterfactual **Safe** smart account owned by the embedded key, plus send/wait UserOp helpers, in `src/lib/aa/account.ts` per `contracts/erc4337-integration.md`
-- [ ] T015 Implement the claim session state machine + error categories (runes store) in `src/lib/claim/session.svelte.ts` per `data-model.md`
-- [ ] T016 Implement the base accessible shell: `src/routes/+layout.svelte`, `src/routes/+page.svelte` (reads URL fragment client-side, clears it via `replaceState`), an `aria-live` status region in `src/lib/components/StatusBanner.svelte`, and a focus-management util in `src/lib/a11y/focus.ts`
+- [X] T014 [P] Implement the ERC-4337 account/bundler/Paymaster client (permissionless): build counterfactual **Safe** smart account owned by the embedded key, plus send/wait UserOp helpers, in `src/lib/aa/account.ts` per `contracts/erc4337-integration.md`
+- [X] T015 Implement the claim session state machine + error categories (runes store) in `src/lib/claim/session.svelte.ts` per `data-model.md`
+- [X] T016 Implement the base accessible shell: `src/routes/+layout.svelte`, `src/routes/+page.svelte` (reads URL fragment client-side, clears it via `replaceState`), an `aria-live` status region in `src/lib/components/StatusBanner.svelte`, and a focus-management util in `src/lib/a11y/focus.ts`
 
 **Checkpoint**: Foundation ready — user stories can now proceed.
 
@@ -70,18 +70,18 @@ registration completes on-chain with no gas paid and the success card shows the 
 
 ### Tests for User Story 1 (write first, must FAIL) ⚠️
 
-- [ ] T017 [P] [US1] Unit test EIP-712 signing of `{label,target}` + `register` calldata encoding in `tests/unit/sign.spec.ts`
+- [X] T017 [P] [US1] Unit test EIP-712 signing of `{label,target}` + `register` calldata encoding in `tests/unit/sign.spec.ts`
 - [ ] T018 [P] [US1] Integration test: sponsored `register` succeeds and emits `Registered` against Anvil + mock registrar in `tests/integration/register.spec.ts`
 - [ ] T019 [P] [US1] E2E test: valid link → enter label+address → submit → success card, zero gas; axe AA on each state in `tests/e2e/claim.spec.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T020 [P] [US1] Implement registrar read `available(label)` in `src/lib/registrar/reads.ts`
-- [ ] T021 [P] [US1] Implement `(label,target)` signing with the embedded key (viem account) in `src/lib/registrar/sign.ts` (uses T011)
-- [ ] T022 [US1] Implement the register flow: build calldata → send Paymaster-sponsored UserOp → wait receipt → read `Registered`, in `src/lib/claim/register.ts` (uses T014, T020, T021)
-- [ ] T023 [P] [US1] Build the accessible `ClaimForm` (label + address inputs, labels, submit) in `src/lib/components/ClaimForm.svelte`
-- [ ] T024 [P] [US1] Build the `SuccessCard` (FQ name + associated address) in `src/lib/components/SuccessCard.svelte`
-- [ ] T025 [US1] Wire the happy-path state flow in `src/routes/+page.svelte` and `src/lib/claim/session.svelte.ts`: LoadingLink → Ready → Signing → Submitting → Pending → Success, with focus + `aria-live` updates
+- [X] T020 [P] [US1] Implement registrar read `available(label)` in `src/lib/registrar/reads.ts`
+- [X] T021 [P] [US1] Implement `(label,target)` signing with the embedded key (viem account) in `src/lib/registrar/sign.ts` (uses T011)
+- [X] T022 [US1] Implement the register flow: build calldata → send Paymaster-sponsored UserOp → wait receipt → read `Registered`, in `src/lib/claim/register.ts` (uses T014, T020, T021)
+- [X] T023 [P] [US1] Build the accessible `ClaimForm` (label + address inputs, labels, submit) in `src/lib/components/ClaimForm.svelte`
+- [X] T024 [P] [US1] Build the `SuccessCard` (FQ name + associated address) in `src/lib/components/SuccessCard.svelte`
+- [X] T025 [US1] Wire the happy-path state flow in `src/routes/+page.svelte` and `src/lib/claim/session.svelte.ts`: LoadingLink → Ready → Signing → Submitting → Pending → Success, with focus + `aria-live` updates
 
 **Checkpoint**: MVP — a valid link can register a name gaslessly, independently testable.
 
@@ -102,10 +102,10 @@ are rejected with distinct messages and no registration; reopening a redeemed li
 
 ### Implementation for User Story 2
 
-- [ ] T028 [P] [US2] Implement registrar read `whitelist(account) → (authorized, used)` in `src/lib/registrar/reads.ts`
-- [ ] T029 [US2] Add the `CheckingWhitelist` transition resolving to `Ready` / `NotAuthorized` / `AlreadyRedeemed` in `src/lib/claim/session.svelte.ts` (uses T028)
-- [ ] T030 [P] [US2] Build the `LinkState` component for `InvalidLink` / `NotAuthorized` / `AlreadyRedeemed` messaging in `src/lib/components/LinkState.svelte`
-- [ ] T031 [US2] Handle post-success reopen → `AlreadyRedeemed` (re-derive state from chain on load) in `src/routes/+page.svelte`
+- [X] T028 [P] [US2] Implement registrar read `whitelist(account) → (authorized, used)` in `src/lib/registrar/reads.ts`
+- [X] T029 [US2] Add the `CheckingWhitelist` transition resolving to `Ready` / `NotAuthorized` / `AlreadyRedeemed` in `src/lib/claim/session.svelte.ts` (uses T028)
+- [X] T030 [P] [US2] Build the `LinkState` component for `InvalidLink` / `NotAuthorized` / `AlreadyRedeemed` messaging in `src/lib/components/LinkState.svelte`
+- [X] T031 [US2] Handle post-success reopen → `AlreadyRedeemed` (re-derive state from chain on load) in `src/routes/+page.svelte`
 
 **Checkpoint**: US1 + US2 both work; reuse and unauthorized links are blocked distinctly.
 
@@ -126,10 +126,10 @@ a submission failure; each yields a distinct message and the claimant can recove
 
 ### Implementation for User Story 3
 
-- [ ] T034 [US3] Add live inline validation to `src/lib/components/ClaimForm.svelte`: show normalized label preview, block submit on invalid label/address with `aria` error messaging (uses T012, T013)
-- [ ] T035 [US3] Map name-availability loss to `NameTaken` (pre-check + revert mapping) in `src/lib/claim/register.ts`
-- [ ] T036 [P] [US3] Build the `ErrorAlert` component and map `SponsorshipFailed` / `SubmissionFailed` to actionable messages in `src/lib/components/ErrorAlert.svelte`
-- [ ] T037 [US3] Add `Pending` UX (disable resubmission) and `Failed → Ready` safe-retry transition in `src/routes/+page.svelte` and `src/lib/claim/session.svelte.ts`
+- [X] T034 [US3] Add live inline validation to `src/lib/components/ClaimForm.svelte`: show normalized label preview, block submit on invalid label/address with `aria` error messaging (uses T012, T013)
+- [X] T035 [US3] Map name-availability loss to `NameTaken` (pre-check + revert mapping) in `src/lib/claim/register.ts`
+- [X] T036 [P] [US3] Build the `ErrorAlert` component and map `SponsorshipFailed` / `SubmissionFailed` to actionable messages in `src/lib/components/ErrorAlert.svelte`
+- [X] T037 [US3] Add `Pending` UX (disable resubmission) and `Failed → Ready` safe-retry transition in `src/routes/+page.svelte` and `src/lib/claim/session.svelte.ts`
 
 **Checkpoint**: All stories independently functional; every error state is distinct and recoverable.
 
