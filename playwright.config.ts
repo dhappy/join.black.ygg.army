@@ -1,7 +1,7 @@
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
-	webServer: { command: 'pnpm run build && pnpm exec vite preview --port 6666', port: 6666 },
+	webServer: { command: 'node scripts/e2e-server.mjs', port: 6666, timeout: 120_000 },
 	use: {
 		baseURL: 'http://localhost:6666',
 		// 6666 is on Chromium's restricted-port list; allow it explicitly.

@@ -40,26 +40,10 @@ jobs:
       - run: forge build --root test-contracts
       - run: pnpm run test:integration
 
-  e2e-smoke:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm exec playwright test e2e/invalid-link.e2e.ts
-
-  # End-to-end tests need a deployed registrar, Paymaster, bundler, and the PUBLIC_* config
-  # supplied as repo variables/secrets. Disabled until that infrastructure exists (T009a).
-  # Enable by setting repository variable RUN_E2E=true and providing the values below.
+  # Browser E2E against an Anvil-backed MockRegistrar (scripts/e2e-server.mjs builds the app with the
+  # deployment baked into PUBLIC_* config, then serves it). Covers invalid-link, NotAuthorized,
+  # AlreadyRedeemed, and form-validation flows. Self-contained — no external infra.
   e2e:
-    if: ${{ vars.RUN_E2E == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -70,16 +54,12 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
+      - uses: foundry-rs/foundry-toolchain@v1
       - run: pnpm install --frozen-lockfile
+      - run: forge build --root test-contracts
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm run test:e2e
-        env:
-          PUBLIC_CHAIN_ID: ${{ vars.PUBLIC_CHAIN_ID }}
-          PUBLIC_RPC_URL: ${{ vars.PUBLIC_RPC_URL }}
-          PUBLIC_REGISTRAR_ADDRESS: ${{ vars.PUBLIC_REGISTRAR_ADDRESS }}
-          PUBLIC_POSTFIX: ${{ vars.PUBLIC_POSTFIX }}
-          PUBLIC_REGISTRAR_NAME: ${{ vars.PUBLIC_REGISTRAR_NAME }}
-          PUBLIC_REGISTRAR_VERSION: ${{ vars.PUBLIC_REGISTRAR_VERSION }}
-          PUBLIC_ENTRYPOINT_ADDRESS: ${{ vars.PUBLIC_ENTRYPOINT_ADDRESS }}
-          PUBLIC_BUNDLER_URL: ${{ secrets.PUBLIC_BUNDLER_URL }}
-          PUBLIC_PAYMASTER_URL: ${{ secrets.PUBLIC_PAYMASTER_URL }}
+
+  # NOTE: the gasless success-path E2E (claimant submits → name registered) needs a real ERC-4337
+  # bundler + Paymaster and is not yet implemented (T019). The job above uses the mock registrar and
+  # does not exercise the sponsored submission.

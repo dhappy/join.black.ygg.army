@@ -98,7 +98,7 @@ are rejected with distinct messages and no registration; reopening a redeemed li
 ### Tests for User Story 2 (write first, must FAIL) ⚠️
 
 - [X] T026 [P] [US2] Integration test: second `register` with the same key reverts (single use); a non-whitelisted signer reverts, in `tests/integration/whitelist.spec.ts`
-- [ ] T027 [P] [US2] E2E test: non-whitelisted → `NotAuthorized`; redeemed → `AlreadyRedeemed`; reopen after success → `AlreadyRedeemed`, in `tests/e2e/reuse.spec.ts`
+- [X] T027 [P] [US2] E2E test: non-whitelisted → `NotAuthorized`; redeemed → `AlreadyRedeemed`; reopen after success → `AlreadyRedeemed`, in `tests/e2e/reuse.spec.ts`
 
 ### Implementation for User Story 2
 
@@ -122,7 +122,7 @@ a submission failure; each yields a distinct message and the claimant can recove
 ### Tests for User Story 3 (write first, must FAIL) ⚠️
 
 - [X] T032 [P] [US3] Unit test ENSIP-15 accept/reject + normalized-preview and address validation in `tests/unit/validation.spec.ts`
-- [ ] T033 [P] [US3] E2E test: invalid label inline error; malformed address; name-taken; sponsorship/submission failure + retry; axe AA, in `tests/e2e/validation.spec.ts`
+- [X] T033 [P] [US3] E2E test: invalid label inline error; malformed address; name-taken; sponsorship/submission failure + retry; axe AA, in `tests/e2e/validation.spec.ts`
 
 ### Implementation for User Story 3
 
