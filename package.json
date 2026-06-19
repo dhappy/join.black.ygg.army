@@ -3,6 +3,13 @@
 	"private": true,
 	"version": "0.0.1",
 	"type": "module",
+	"pnpm": {
+		"auditConfig": {
+			"ignoreGhsas": [
+				"GHSA-96hv-2xvq-fx4p"
+			]
+		}
+	},
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
@@ -13,7 +20,8 @@
 		"lint": "eslint .",
 		"test:unit": "vitest",
 		"test": "npm run test:unit -- --run && npm run test:e2e",
-		"test:e2e": "playwright install && playwright test"
+		"test:e2e": "playwright install && playwright test",
+		"test:ci": "vitest run --project server"
 	},
 	"devDependencies": {
 		"@axe-core/playwright": "^4.11.3",

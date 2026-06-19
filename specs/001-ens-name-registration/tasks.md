@@ -141,8 +141,8 @@ a submission failure; each yields a distinct message and the claimant can recove
 
 - [ ] T038 [P] Privacy guard: assert the key/signature are excluded from all logs/error payloads and the fragment is cleared via `replaceState`; add a guard test in `tests/unit/privacy.spec.ts` (SC-005, FR-010)
 - [ ] T039 [P] Accessibility sweep: manual keyboard + screen-reader pass across every state and managed focus; finalize axe config (FR-011, SC-006)
-- [ ] T040 [P] CI pipeline: run `lint`, `check` (typecheck), `test:unit`, `test:integration`, `test:e2e`, and `pnpm audit` as gates (Principle V)
-- [ ] T041 [P] Docs: `README.md` covering `PUBLIC_*` config, static build (`pnpm build`), and deployment
+- [X] T040 [P] CI pipeline: run `lint`, `check` (typecheck), `test:unit`, `test:integration`, `test:e2e`, and `pnpm audit` as gates (Principle V)
+- [X] T041 [P] Docs: `README.md` covering `PUBLIC_*` config, static build (`pnpm build`), and deployment
 - [ ] T042 Run the full `quickstart.md` validation end-to-end (all scenarios pass)
 - [ ] T043 Verify performance targets: claim < 2 min, interactions feel instant, mobile bundle reasonable (SC-001)
 
