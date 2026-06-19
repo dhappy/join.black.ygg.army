@@ -23,3 +23,8 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 # Playwright
 test-results
+
+# Foundry / integration test artifacts
+test-contracts/out/
+test-contracts/cache/
+tests/integration/.deployment.json

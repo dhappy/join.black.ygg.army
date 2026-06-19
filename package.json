@@ -21,7 +21,8 @@
 		"test:unit": "vitest",
 		"test": "npm run test:unit -- --run && npm run test:e2e",
 		"test:e2e": "playwright install && playwright test",
-		"test:ci": "vitest run --project server"
+		"test:ci": "vitest run --project server",
+		"test:integration": "vitest run --config vitest.integration.config.ts"
 	},
 	"devDependencies": {
 		"@axe-core/playwright": "^4.11.3",

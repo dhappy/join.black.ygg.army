@@ -24,8 +24,24 @@ jobs:
       - run: pnpm run build
       - run: pnpm audit --prod --audit-level high
 
-  # Integration + end-to-end tests need a deployed registrar, Paymaster, bundler, and the PUBLIC_*
-  # config supplied as repo variables/secrets. Disabled until that infrastructure exists (T009a).
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: foundry-rs/foundry-toolchain@v1
+      - run: pnpm install --frozen-lockfile
+      - run: forge build --root test-contracts
+      - run: pnpm run test:integration
+
+  # End-to-end tests need a deployed registrar, Paymaster, bundler, and the PUBLIC_* config
+  # supplied as repo variables/secrets. Disabled until that infrastructure exists (T009a).
   # Enable by setting repository variable RUN_E2E=true and providing the values below.
   e2e:
     if: ${{ vars.RUN_E2E == 'true' }}

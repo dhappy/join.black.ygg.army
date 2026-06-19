@@ -36,8 +36,8 @@ under `tests/`, at repository root (per plan.md Structure Decision).
 - [X] T003 [P] Add dev dependency `@axe-core/playwright` and configure it in `playwright.config.ts`
 - [X] T004 [P] Configure static output: set `@sveltejs/adapter-static` and prerender in `svelte.config.js` and `src/routes/+layout.ts`
 - [X] T005 [P] Add public config: `.env.example` with all `PUBLIC_*` keys from `contracts/registrar-interface.md` and `contracts/erc4337-integration.md`, and a typed loader in `src/lib/chain/config.ts`
-- [ ] T006 [P] Add scripts to `package.json`: `test:unit` (vitest), `test:integration` (vitest, anvil), `test:e2e` (playwright), `lint`, `check` (typecheck)
-- [ ] T007 [P] Set up the integration harness in `tests/integration/setup.ts`: start Anvil, deploy a mock registrar, and whitelist a known test signer (per `contracts/registrar-interface.md`)
+- [X] T006 [P] Add scripts to `package.json`: `test:unit` (vitest), `test:integration` (vitest, anvil), `test:e2e` (playwright), `lint`, `check` (typecheck)
+- [X] T007 [P] Set up the integration harness in `tests/integration/setup.ts`: start Anvil, deploy a mock registrar, and whitelist a known test signer (per `contracts/registrar-interface.md`)
 
 ---
 
@@ -71,7 +71,7 @@ registration completes on-chain with no gas paid and the success card shows the 
 ### Tests for User Story 1 (write first, must FAIL) ⚠️
 
 - [X] T017 [P] [US1] Unit test EIP-712 signing of `{label,target}` + `register` calldata encoding in `tests/unit/sign.spec.ts`
-- [ ] T018 [P] [US1] Integration test: sponsored `register` succeeds and emits `Registered` against Anvil + mock registrar in `tests/integration/register.spec.ts`
+- [X] T018 [P] [US1] Integration test: sponsored `register` succeeds and emits `Registered` against Anvil + mock registrar in `tests/integration/register.spec.ts`
 - [ ] T019 [P] [US1] E2E test: valid link → enter label+address → submit → success card, zero gas; axe AA on each state in `tests/e2e/claim.spec.ts`
 
 ### Implementation for User Story 1
@@ -97,7 +97,7 @@ are rejected with distinct messages and no registration; reopening a redeemed li
 
 ### Tests for User Story 2 (write first, must FAIL) ⚠️
 
-- [ ] T026 [P] [US2] Integration test: second `register` with the same key reverts (single use); a non-whitelisted signer reverts, in `tests/integration/whitelist.spec.ts`
+- [X] T026 [P] [US2] Integration test: second `register` with the same key reverts (single use); a non-whitelisted signer reverts, in `tests/integration/whitelist.spec.ts`
 - [ ] T027 [P] [US2] E2E test: non-whitelisted → `NotAuthorized`; redeemed → `AlreadyRedeemed`; reopen after success → `AlreadyRedeemed`, in `tests/e2e/reuse.spec.ts`
 
 ### Implementation for User Story 2
