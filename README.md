@@ -66,12 +66,22 @@ HTTPS (e.g. copy into `public_html/`). No server runtime is required.
 
 ### Registrar contract (test mock)
 
-Deploy the test `MockRegistrar` with the helper script (pinned to Base Sepolia — where Biconomy's
-testnet gas tank lives, so MEE testnet sponsorship works). Import a funded deployer keystore first:
+Deploy the test `MockRegistrar` with the helper script. It defaults to **Base Sepolia** (where
+Biconomy's testnet gas tank lives, so MEE testnet sponsorship works). Import a funded deployer
+keystore first:
 
 ```sh
 cast wallet import deployer --interactive
 ACCOUNT=deployer ./test-contracts/deploy.sh <signer-address-to-whitelist> ...
+```
+
+Pick a network with `NETWORK=` (`base-sepolia` | `base` | `mainnet` | `sepolia` | `optimism` |
+`op-sepolia` | `arbitrum`), or override `RPC_URL` / `EXPLORER_URL`. Mainnets require an explicit
+`CONFIRM_MAINNET=yes` (and note: Biconomy *testnet* sponsorship does not apply on mainnet — a
+production MEE gas tank is needed there):
+
+```sh
+NETWORK=mainnet CONFIRM_MAINNET=yes ACCOUNT=deployer ./test-contracts/deploy.sh
 ```
 
 It deploys, whitelists any addresses you pass, and prints the `PUBLIC_*` values to set. The mock is
