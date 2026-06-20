@@ -43,7 +43,10 @@ export async function registerName(request: RegisterRequest): Promise<RegisterRe
 		sponsorship: true,
 		sponsorshipOptions: testnetSponsorshipOptions()
 	})
-	await meeClient.waitForSupertransactionReceipt({ hash })
+	const receipt = await meeClient.waitForSupertransactionReceipt({ hash })
+	// Prefer the on-chain transaction hash (for the block-explorer link); fall back to the
+	// supertransaction hash if no per-chain receipt is present.
+	const txHash = receipt.receipts.at(0)?.transactionHash ?? hash
 
-	return { fqName: fullyQualifiedName(request.label, cfg.postfix), txHash: hash }
+	return { fqName: fullyQualifiedName(request.label, cfg.postfix), txHash }
 }

@@ -7,6 +7,7 @@
 	import { normalizeLabel } from '$lib/ens/normalize'
 	import { validateAddress } from '$lib/ens/address'
 	import { loadConfig } from '$lib/chain/config'
+	import { explorerTxUrl } from '$lib/chain/explorer'
 	import type { ErrorCategory } from '$lib/claim/state'
 	import StatusBanner from '$lib/components/StatusBanner.svelte'
 	import ClaimForm from '$lib/components/ClaimForm.svelte'
@@ -16,10 +17,15 @@
 
 	const session = createClaimSession()
 	let postfix = $state('')
+	let chainId = $state(0)
+	let explorerBase = $state<string | undefined>(undefined)
 
 	onMount(async () => {
 		try {
-			postfix = loadConfig().postfix
+			const cfg = loadConfig()
+			postfix = cfg.postfix
+			chainId = cfg.chainId
+			explorerBase = cfg.explorerUrl
 		} catch {
 			postfix = ''
 		}
@@ -73,7 +79,10 @@
 	{:else if session.state.kind === 'Submitting' || session.state.kind === 'Pending'}
 		<p aria-live="polite">Registering your name…</p>
 	{:else if session.state.kind === 'Success'}
-		<SuccessCard fqName={session.state.fqName} target={session.state.target} />
+		<SuccessCard
+			{...session.state}
+			explorerUrl={explorerTxUrl(chainId, session.state.txHash, explorerBase)}
+		/>
 	{:else if session.state.kind === 'Failed'}
 		<ErrorAlert error={session.state.error} onretry={() => session.retry()} />
 	{/if}

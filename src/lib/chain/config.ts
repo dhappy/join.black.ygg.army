@@ -8,6 +8,7 @@ export interface AppConfig {
 	postfix: string
 	registrarName: string
 	registrarVersion: string
+	explorerUrl?: string
 }
 
 const REQUIRED_KEYS = [
@@ -33,6 +34,7 @@ export function loadConfig(): AppConfig {
 		registrarAddress: env.PUBLIC_REGISTRAR_ADDRESS!,
 		postfix: env.PUBLIC_POSTFIX!,
 		registrarName: env.PUBLIC_REGISTRAR_NAME!,
-		registrarVersion: env.PUBLIC_REGISTRAR_VERSION!
+		registrarVersion: env.PUBLIC_REGISTRAR_VERSION!,
+		explorerUrl: env.PUBLIC_EXPLORER_URL || undefined
 	}
 }
