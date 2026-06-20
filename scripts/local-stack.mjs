@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // Manual local test stack: Anvil + deployed MockRegistrar + the app served with the deployment
-// baked into PUBLIC_* config (via build + vite preview). Prints claim links for each state.
+// baked into PUBLIC_* config (via build + sirv static server). Prints claim links for each state.
 // Not used by CI; for hand-testing in a browser. Stop with Ctrl-C.
 import { spawn, spawnSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
@@ -86,7 +86,7 @@ const buildEnv = {
 	PUBLIC_REGISTRAR_VERSION: VERSION
 }
 spawnSync('pnpm', ['exec', 'vite', 'build'], { stdio: 'inherit', env: buildEnv })
-vite = spawn('pnpm', ['exec', 'vite', 'preview', '--port', String(PORT), '--host', '127.0.0.1'], { stdio: 'inherit' })
+vite = spawn('pnpm', ['exec', 'sirv', 'build', '--port', String(PORT), '--host', '127.0.0.1', '--single', '--quiet'], { stdio: 'inherit' })
 
 console.log('\n========================================================')
 console.log(`  Local stack ready. Registrar deployed at ${registrar}`)

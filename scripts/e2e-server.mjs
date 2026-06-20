@@ -89,7 +89,7 @@ const consumeHash = await wallet.writeContract({
 await publicClient.waitForTransactionReceipt({ hash: consumeHash })
 
 // Build with the deployment baked into PUBLIC_* config ($env/dynamic/public is snapshot into the
-// static build), then serve via `vite preview`. (`vite dev` is avoided — heavier and flaky under
+// static build), then serve `build/` via sirv (a plain static server). (`vite dev` is avoided — under
 // sandboxes; preview serves the prerendered static output.)
 const buildEnv = {
 	...process.env,
@@ -101,6 +101,8 @@ const buildEnv = {
 	PUBLIC_REGISTRAR_VERSION: VERSION
 }
 spawnSync('pnpm', ['exec', 'vite', 'build'], { stdio: 'inherit', env: buildEnv })
-vite = spawn('pnpm', ['exec', 'vite', 'preview', '--port', '6666', '--host', '127.0.0.1'], {
-	stdio: 'ignore'
-})
+vite = spawn(
+	'pnpm',
+	['exec', 'sirv', 'build', '--port', '6666', '--host', '127.0.0.1', '--single', '--quiet'],
+	{ stdio: 'ignore' }
+)
