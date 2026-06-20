@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 // E2E orchestrator: start Anvil, deploy MockRegistrar, set up whitelist states, then run the dev
 // server with the deployment baked into PUBLIC_* config. Used as the Playwright webServer.
 // Covers the non-submission flows (NotAuthorized / AlreadyRedeemed / form validation); the gasless

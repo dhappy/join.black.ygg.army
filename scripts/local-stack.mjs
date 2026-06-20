@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 // Manual local test stack: Anvil + deployed MockRegistrar + the app served with the deployment
 // baked into PUBLIC_* config (via build + vite preview). Prints claim links for each state.
 // Not used by CI; for hand-testing in a browser. Stop with Ctrl-C.

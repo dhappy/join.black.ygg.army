@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 // Generate a valid one-time claim link: a fresh 32-byte secp256k1 key, base64url-encoded into the
 // URL fragment. Prints the address to whitelist (allow()) and the link to open.
 //
