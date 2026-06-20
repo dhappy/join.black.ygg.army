@@ -5,6 +5,7 @@
 // Not used by CI; for hand-testing in a browser. Stop with Ctrl-C.
 import { spawn, spawnSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
+import { createServer } from 'node:net'
 import { createPublicClient, createWalletClient, hexToBytes, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { foundry } from 'viem/chains'
@@ -41,6 +42,26 @@ function shutdown() {
 }
 process.on('SIGTERM', shutdown)
 process.on('SIGINT', shutdown)
+
+// Fail fast on a port conflict — otherwise a leftover server from a previous run keeps serving a
+// stale build and you get a confusing wall of 404s.
+function portFree(port) {
+	return new Promise((resolve) => {
+		const probe = createServer()
+		probe.once('error', () => resolve(false))
+		probe.once('listening', () => probe.close(() => resolve(true)))
+		probe.listen(port, '127.0.0.1')
+	})
+}
+for (const [port, what] of [[8545, 'Anvil RPC'], [PORT, 'web server']]) {
+	if (!(await portFree(port))) {
+		console.error(
+			`Port ${port} (${what}) is already in use — stop the previous instance first:\n` +
+				`  lsof -ti tcp:${port} | xargs -r kill -9`
+		)
+		process.exit(1)
+	}
+}
 
 if (!existsSync(ARTIFACT)) spawnSync('forge', ['build', '--root', 'test-contracts'], { stdio: 'inherit' })
 const artifact = JSON.parse(readFileSync(ARTIFACT, 'utf8'))
