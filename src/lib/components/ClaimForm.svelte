@@ -2,8 +2,12 @@
 	import { normalizeLabel, previewName } from '$lib/ens/normalize'
 	import { validateAddress } from '$lib/ens/address'
 
-	let { onsubmit, postfix }: { onsubmit: (label: string, address: string) => void, postfix: string } =
-		$props()
+	let { onsubmit, postfix }: {
+		onsubmit: (
+			(label: string, address: string) => void
+	  ),
+		postfix: string
+	} = $props()
 
 	let label = $state('')
 	let address = $state('')
