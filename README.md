@@ -28,9 +28,10 @@ private keys or secret API keys here. Copy `.env.example` to `.env` and fill in:
 | `PUBLIC_REGISTRAR_ADDRESS` | Registrar contract address |
 | `PUBLIC_POSTFIX` | Fixed parent name (e.g. `black.ygg.army`) |
 | `PUBLIC_REGISTRAR_NAME` / `PUBLIC_REGISTRAR_VERSION` | EIP-712 domain values |
-| `PUBLIC_ENTRYPOINT_ADDRESS` | ERC-4337 EntryPoint |
-| `PUBLIC_BUNDLER_URL` | Bundler RPC endpoint |
-| `PUBLIC_PAYMASTER_URL` | On-chain-scoped verifying Paymaster endpoint |
+
+Gas sponsorship uses **Biconomy MEE testnet sponsorship** (`@biconomy/abstractjs`) — it works out of
+the box on testnets with no bundler/Paymaster URLs, EntryPoint address, or dashboard setup, so there
+are no related config keys.
 
 The build itself does not require these (the shell prerenders without them); they are read in the
 browser when a claim is processed.

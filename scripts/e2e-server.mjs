@@ -97,10 +97,7 @@ const buildEnv = {
 	PUBLIC_REGISTRAR_ADDRESS: registrar,
 	PUBLIC_POSTFIX: POSTFIX,
 	PUBLIC_REGISTRAR_NAME: NAME,
-	PUBLIC_REGISTRAR_VERSION: VERSION,
-	PUBLIC_ENTRYPOINT_ADDRESS: '0x0000000071727De22E5E9d8BAf0edAc6f37da032',
-	PUBLIC_BUNDLER_URL: 'http://127.0.0.1:9/bundler',
-	PUBLIC_PAYMASTER_URL: 'http://127.0.0.1:9/paymaster'
+	PUBLIC_REGISTRAR_VERSION: VERSION
 }
 spawnSync('pnpm', ['exec', 'vite', 'build'], { stdio: 'inherit', env: buildEnv })
 vite = spawn('pnpm', ['exec', 'vite', 'preview', '--port', '6666', '--host', '127.0.0.1'], {

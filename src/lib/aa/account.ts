@@ -1,33 +1,43 @@
 import { http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { createBundlerClient, createPaymasterClient, entryPoint07Address } from 'viem/account-abstraction'
-import { toSafeSmartAccount } from 'permissionless/accounts'
+import {
+	DEFAULT_MEE_VERSION,
+	createMeeClient,
+	getDefaultMEENetworkApiKey,
+	getDefaultMEENetworkUrl,
+	getDefaultMeeGasTank,
+	getMEEVersion,
+	toMultichainNexusAccount
+} from '@biconomy/abstractjs'
 import type { Hex } from 'viem'
+import { appChain } from '../chain/client'
 import { loadConfig } from '../chain/config'
-import { appChain, publicClient } from '../chain/client'
 
-// Build a counterfactual Safe smart account owned by the embedded key, wired to a bundler and an
-// on-chain-scoped Paymaster so the claimant pays no gas (research.md §3-4, contracts/erc4337-integration.md).
-export async function createSponsoredClient(privateKey: Hex) {
-	const cfg = loadConfig()
-	const client = publicClient()
-	const owner = privateKeyToAccount(privateKey)
-
-	const account = await toSafeSmartAccount({
-		client,
-		owners: [owner],
-		version: '1.4.1',
-		entryPoint: { address: entryPoint07Address, version: '0.7' }
+// Gasless via Biconomy MEE testnet sponsorship (https://docs.biconomy.io/gasless-apps/testnet-sponsorship).
+// The embedded key signs a Nexus smart account; the SDK's staging MEE network + shared testnet gas
+// tank sponsor gas out of the box — no bundler/Paymaster URLs or dashboard setup required.
+export async function createSponsoredMeeClient(privateKey: Hex) {
+	const account = await toMultichainNexusAccount({
+		chainConfigurations: [
+			{
+				chain: appChain(),
+				transport: http(loadConfig().rpcUrl),
+				version: getMEEVersion(DEFAULT_MEE_VERSION)
+			}
+		],
+		signer: privateKeyToAccount(privateKey)
 	})
-
-	const paymaster = createPaymasterClient({ transport: http(cfg.paymasterUrl) })
-	const bundler = createBundlerClient({
+	return createMeeClient({
 		account,
-		client,
-		chain: appChain(),
-		transport: http(cfg.bundlerUrl),
-		paymaster
+		url: getDefaultMEENetworkUrl(true),
+		apiKey: getDefaultMEENetworkApiKey(true)
 	})
+}
 
-	return { account, bundler }
+// Testnet sponsorship options for meeClient.execute({ sponsorship: true, sponsorshipOptions }).
+export function testnetSponsorshipOptions() {
+	return {
+		url: getDefaultMEENetworkUrl(true),
+		gasTank: getDefaultMeeGasTank(true)
+	}
 }

@@ -28,38 +28,35 @@ alternatives.
 
 ## 3. Account abstraction / gasless delivery
 
-- **Decision**: `permissionless` ~0.2 over viem. The embedded key is the **owner/signer of a
-  counterfactual ERC-4337 smart account**; the claim is sent as a single Paymaster-sponsored
-  UserOperation whose `callData` invokes `registrar.register(label, target, signature)`. The
-  account is deployed on that first op via `initCode`.
+- **Decision**: **Biconomy MEE** via `@biconomy/abstractjs`. The embedded key signs a **Nexus** smart
+  account (`toMultichainNexusAccount`); the claim is submitted as a single sponsored **MEE
+  supertransaction** (`meeClient.execute`) whose instruction calls
+  `registrar.register(label, target, signature)`, then awaited with `waitForSupertransactionReceipt`.
 - **Rationale**: The clarified model (registrar recovers the `(name, address)` signer from calldata;
-  ERC-4337 is only the gasless transport) means the *sender* identity is irrelevant to authorization
-  — so the simplest sender is a smart account owned by the same embedded key, requiring the claimant
-  to hold exactly one secret. `permissionless` is viem-native and provides bundler + Paymaster
-  clients and UserOp building/waiting.
-- **Smart-account type**: **Safe** (audited, broad `permissionless` support) as the default,
-  config-overridable. It is throwaway (one registration), so minimal features are needed.
-- **Alternatives considered**: Smart-account-owner authorization where the registrar trusts
-  `msg.sender` (rejected in clarify Q3 — registrar recovers the signer instead); a project-run
-  relayer/meta-tx backend (rejected: adds a backend, violating the no-backend constraint); EOA + user
-  pays gas (rejected by clarify Q1 — must be gasless).
+  AA is only the gasless transport) means the *sender* identity is irrelevant to authorization — so
+  the simplest sender is a Nexus account owned by the same embedded key, requiring the claimant to
+  hold exactly one secret. Biconomy MEE supplies the bundler + gas sponsorship and the SDK handles
+  account deployment, execution, and receipt waiting.
+- **Alternatives considered**: viem bundler + `permissionless` Safe account with a self-hosted
+  verifying Paymaster (rejected: requires standing up and funding our own bundler + Paymaster;
+  Biconomy testnet sponsorship is out-of-the-box); registrar trusting `msg.sender` (rejected in
+  clarify Q3); a project-run relayer/meta-tx backend (rejected: adds a backend); EOA + user pays gas
+  (rejected by clarify Q1 — must be gasless).
 
-## 4. Paymaster sponsorship model (keeping the client static & key-safe)
+## 4. Gas sponsorship model (Biconomy MEE testnet sponsorship)
 
-- **Decision**: Treat the bundler + Paymaster as **external infrastructure provided by deployment
-  config** (consistent with the spec listing the Paymaster as an externally managed dependency). The
-  recommended deployment is a **project-owned Verifying Paymaster scoped on-chain to the registrar's
-  `register` selector** (and/or the registrar address), funded with gas, so the sponsorship endpoint
-  the client calls carries no secret that could be abused for arbitrary sponsorship.
-- **Rationale**: A static client cannot safely hold a secret Paymaster API key (Principle III). A
-  Paymaster whose policy is enforced on-chain (only sponsors `register` calls to the registrar) can
-  be exposed to the client without a backend. If a third-party Paymaster that requires a secret key
-  is mandated instead, the *minimal* addition is a single stateless serverless function that signs
-  Paymaster data only for registrar calls — explicitly out of scope here and flagged for the
-  operator. The app reads bundler URL, Paymaster URL, EntryPoint, factory, and registrar address
-  from public build-time config.
-- **Alternatives considered**: Embedding a third-party Paymaster API key in the bundle (rejected:
-  secret leakage); a full backend relayer (rejected: no-backend constraint).
+- **Decision**: Use **Biconomy MEE testnet sponsorship** — `createMeeClient` with
+  `getDefaultMEENetworkUrl(true)` / `getDefaultMEENetworkApiKey(true)`, and
+  `execute({ sponsorship: true, sponsorshipOptions: { url, gasTank: getDefaultMeeGasTank(true) } })`.
+  Gas is covered by Biconomy's shared testnet gas tank (on Base Sepolia, chain 84532); no dashboard,
+  no bundler/Paymaster URLs, and no client-held *secret* (the testnet API key is a public shared
+  value baked at build time).
+- **Rationale**: Keeps the client static and backend-free (Principle II/III) while removing the need
+  to operate and fund our own bundler + verifying Paymaster. Production switches to a configured MEE
+  node URL + API key + a project gas tank (Biconomy dashboard) — a config change, not a code change.
+- **Alternatives considered**: self-hosted ERC-4337 bundler + on-chain-scoped verifying Paymaster
+  (rejected: infra to run and fund; more moving parts than testnet sponsorship); embedding a secret
+  Paymaster API key in the bundle (rejected: secret leakage); a backend relayer (rejected: no-backend).
 
 ## 5. Target chain / network
 

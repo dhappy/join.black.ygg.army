@@ -1,47 +1,36 @@
-# Contract: ERC-4337 Gasless Integration
+# Contract: Gasless Integration (Biconomy MEE)
 
-How the app delivers the `register` call gaslessly. The bundler, Paymaster, EntryPoint, and account
-factory are **external infrastructure provided by deployment config** (spec lists the Paymaster as
-externally managed). This is the integration contract the app codes against.
+How the app delivers the `register` call gaslessly, via **Biconomy MEE testnet sponsorship**
+(`@biconomy/abstractjs`). On testnets this needs **no** bundler/Paymaster URLs, EntryPoint address,
+or dashboard — the SDK supplies them. See https://docs.biconomy.io/gasless-apps/testnet-sponsorship.
 
 ## Flow
 
-1. Build a counterfactual **smart account** owned by the embedded key (signer = `signerAddress`).
-   First op carries `initCode` to deploy it.
-2. Encode `callData` = call to `REGISTRAR_ADDRESS.register(label, target, signature)` where
-   `signature` is the EIP-712 signature from `contracts/registrar-interface.md`.
-3. Build a UserOperation; request **Paymaster sponsorship** so `maxFeePerGas`/`preVerificationGas`
-   etc. are covered by the Paymaster (claimant pays nothing — FR-005, SC-002).
-4. Sign the UserOperation with the embedded key (the account's owner signature).
-5. Send to the **bundler**; record `userOpHash` → `Pending`.
-6. Wait for the UserOp receipt; on success → `Success` (read `Registered` event); on revert or
-   sponsorship/network failure → `Failed`/`SponsorshipFailed` (FR-012).
+1. Build a **Nexus** smart account from the embedded key:
+   `toMultichainNexusAccount({ chainConfigurations: [{ chain, transport, version }], signer })`.
+2. Create the MEE client against the staging network:
+   `createMeeClient({ account, url: getDefaultMEENetworkUrl(true), apiKey: getDefaultMEENetworkApiKey(true) })`.
+3. Encode `data` = `registrar.register(label, target, signature)` where `signature` is the EIP-712
+   signature from `contracts/registrar-interface.md`.
+4. Submit a **sponsored supertransaction**:
+   `execute({ instructions: [{ calls: [{ to: REGISTRAR, data }], chainId }], sponsorship: true, sponsorshipOptions: { url: getDefaultMEENetworkUrl(true), gasTank: getDefaultMeeGasTank(true) } })`
+   → returns `{ hash }`. Claimant pays nothing (FR-005, SC-002).
+5. Await `waitForSupertransactionReceipt({ hash })`; on success → `Success` (the `Registered` event
+   is emitted on-chain); on revert/sponsorship/network failure → `Failed` (FR-012).
 
 Authorization note: the registrar checks the **recovered `(label,target)` signer**, independent of
-the smart-account sender — the AA account is only the gasless transport (clarify Q3).
+the MEE/Nexus sender — the AA account is only the gasless transport (clarify Q3).
 
 ## Configuration the app needs (public, build-time)
 
-| Key | Meaning |
-|-----|---------|
-| `ENTRYPOINT_ADDRESS` | ERC-4337 EntryPoint (e.g., v0.7). |
-| `BUNDLER_URL` | Bundler RPC endpoint. |
-| `PAYMASTER_URL` | Sponsorship endpoint (see sponsorship policy below). |
-| `ACCOUNT_FACTORY` / account type | Smart-account implementation (audited; e.g., Safe/Kernel). |
+None specific to sponsorship — Biconomy testnet sponsorship is out-of-the-box. The app only needs
+the chain/RPC, registrar address, postfix, and EIP-712 domain (see `registrar-interface.md`).
 
-## Sponsorship policy (no client secret)
-
-- **Required for this app:** a **project-owned Verifying Paymaster scoped on-chain** to the registrar
-  address / `register` selector, funded with gas, whose endpoint needs no client-held secret. A
-  static, backend-free client is only viable with this model; a secret-key-gated third-party
-  Paymaster is **out of scope** and would require a separate (currently unplanned) serverless proxy.
-- If a third-party Paymaster requiring a secret key is mandated, the minimal addition is a single
-  stateless serverless function that returns Paymaster data only for registrar `register` calls.
-  This proxy is **out of scope** here and flagged for the operator (it is the only case that would
-  introduce any server component).
+For **production**, switch the MEE client to a configured node URL + API key and a project gas tank
+(Biconomy dashboard); this is a configuration change, not a code change.
 
 ## Failure modes the app handles (FR-012)
 
-- Paymaster declines or is unfunded → `SponsorshipFailed` (actionable message).
-- Bundler/network error or UserOp revert → `SubmissionFailed` (retryable).
+- Sponsorship declined/unavailable → `SponsorshipFailed` (actionable message).
+- MEE/network error or on-chain revert → `SubmissionFailed` (retryable).
 - Availability lost between pre-check and inclusion (race) → registrar reverts → `NameTaken`.

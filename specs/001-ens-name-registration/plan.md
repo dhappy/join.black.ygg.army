@@ -27,7 +27,7 @@ add-ons (no prettier, per project preference). **pnpm** is the package manager; 
 
 **Primary Dependencies** (added after scaffolding):
 - `viem` ~2.x — Ethereum reads/writes, key handling, EIP-712 signing, ENS normalization
-- `permissionless` ~0.2 (viem-native ERC-4337) — smart account, bundler, Paymaster client
+- `@biconomy/abstractjs` (Biconomy MEE / Nexus smart account) — gasless via testnet sponsorship; no bundler/Paymaster URLs needed
 - `@adraffy/ens-normalize` (ENSIP-15) — used directly or via `viem/ens` `normalize`
 - `@sveltejs/adapter-static` — added via the `sv` adapter add-on (static build, no server runtime)
 

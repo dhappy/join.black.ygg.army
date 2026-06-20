@@ -8,9 +8,6 @@ export interface AppConfig {
 	postfix: string
 	registrarName: string
 	registrarVersion: string
-	entryPointAddress: string
-	bundlerUrl: string
-	paymasterUrl: string
 }
 
 const REQUIRED_KEYS = [
@@ -19,10 +16,7 @@ const REQUIRED_KEYS = [
 	'PUBLIC_REGISTRAR_ADDRESS',
 	'PUBLIC_POSTFIX',
 	'PUBLIC_REGISTRAR_NAME',
-	'PUBLIC_REGISTRAR_VERSION',
-	'PUBLIC_ENTRYPOINT_ADDRESS',
-	'PUBLIC_BUNDLER_URL',
-	'PUBLIC_PAYMASTER_URL'
+	'PUBLIC_REGISTRAR_VERSION'
 ] as const
 
 export function missingConfigKeys(): string[] {
@@ -39,9 +33,6 @@ export function loadConfig(): AppConfig {
 		registrarAddress: env.PUBLIC_REGISTRAR_ADDRESS!,
 		postfix: env.PUBLIC_POSTFIX!,
 		registrarName: env.PUBLIC_REGISTRAR_NAME!,
-		registrarVersion: env.PUBLIC_REGISTRAR_VERSION!,
-		entryPointAddress: env.PUBLIC_ENTRYPOINT_ADDRESS!,
-		bundlerUrl: env.PUBLIC_BUNDLER_URL!,
-		paymasterUrl: env.PUBLIC_PAYMASTER_URL!
+		registrarVersion: env.PUBLIC_REGISTRAR_VERSION!
 	}
 }
