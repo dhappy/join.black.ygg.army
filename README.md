@@ -110,6 +110,11 @@ cast send <REGISTRAR_ADDRESS> "allow(address)" <SIGNER_ADDRESS> \
 Generate a claim link (and the signer address to whitelist) with
 `node scripts/make-claim-link.mjs`.
 
+**Verification.** When `ETHERSCAN_API_KEY` is set, `deploy.sh` verifies the contract after
+deploying, retrying until Etherscan has indexed it. To (re)verify an existing deployment, run
+`./test-contracts/verify.sh <address>` with the same env you deployed with (so the constructor
+args match).
+
 ## Security notes
 
 - The claim key travels only in the URL **fragment**, is decoded client-side, is held in memory
