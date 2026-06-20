@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { ClaimState } from '$lib/claim/state'
+	import StateIcon from './StateIcon.svelte'
 
 	let { state }: { state: ClaimState } = $props()
 
@@ -10,6 +11,7 @@
 	}
 </script>
 
-<section role="alert">
+<section class="cp-alert cp-alert--deny" role="alert">
+	<StateIcon kind={state.kind} class="cp-icon" />
 	<p>{text[state.kind] ?? 'This link cannot be used.'}</p>
 </section>

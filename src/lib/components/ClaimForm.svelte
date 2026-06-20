@@ -2,12 +2,8 @@
 	import { normalizeLabel, previewName } from '$lib/ens/normalize'
 	import { validateAddress } from '$lib/ens/address'
 
-	let { onsubmit, postfix }: {
-		onsubmit: (
-			(label: string, address: string) => void
-	  ),
-		postfix: string
-	} = $props()
+	let { onsubmit, postfix }: { onsubmit: (label: string, address: string) => void, postfix: string } =
+		$props()
 
 	let label = $state('')
 	let address = $state('')
@@ -26,39 +22,46 @@
 	}
 </script>
 
-<form onsubmit={handleSubmit} novalidate>
-	<div>
-		<label>
-			<span>Name</span>
+<form class="cp-form" onsubmit={handleSubmit} novalidate>
+	<div class="cp-field">
+		<label for="claim-label">Name</label>
+		<span class="cp-input-wrap" data-invalid={labelError ? 'true' : 'false'}>
 			<input
+				class="cp-input"
 				id="claim-label"
 				bind:value={label}
 				autocomplete="off"
+				spellcheck="false"
 				aria-invalid={labelError ? 'true' : undefined}
 				aria-describedby="claim-label-help{labelError ? ' claim-label-error' : ''}"
 			/>
-		</label>
-		<p id="claim-label-help">
+			<span class="cp-input-wrap__suffix" aria-hidden="true">.{postfix}</span>
+		</span>
+		<p class="cp-hint" id="claim-label-help">
 			{preview ? `Will register: ${preview}` : `Your name under .${postfix}`}
 		</p>
 		{#if labelError}
-			<p id="claim-label-error" role="alert">{labelError}</p>
+			<p class="cp-error" id="claim-label-error" role="alert">{labelError}</p>
 		{/if}
 	</div>
 
-	<div>
+	<div class="cp-field">
 		<label for="claim-address">Resolves to address</label>
-		<input
-			id="claim-address"
-			bind:value={address}
-			autocomplete="off"
-			aria-invalid={addressError ? 'true' : undefined}
-			aria-describedby={addressError ? 'claim-address-error' : undefined}
-		/>
+		<span class="cp-input-wrap" data-invalid={addressError ? 'true' : 'false'}>
+			<input
+				class="cp-input"
+				id="claim-address"
+				bind:value={address}
+				autocomplete="off"
+				spellcheck="false"
+				aria-invalid={addressError ? 'true' : undefined}
+				aria-describedby={addressError ? 'claim-address-error' : undefined}
+			/>
+		</span>
 		{#if addressError}
-			<p id="claim-address-error" role="alert">{addressError}</p>
+			<p class="cp-error" id="claim-address-error" role="alert">{addressError}</p>
 		{/if}
 	</div>
 
-	<button type="submit">Claim name</button>
+	<button class="cp-btn" type="submit">Claim name</button>
 </form>

@@ -9,16 +9,15 @@
 	}: { fqName: string, target: Address, txHash: Hex, explorerUrl: string | null } = $props()
 </script>
 
-<section role="status" aria-live="polite">
-	<h2>You're registered</h2>
-	<p><strong>{fqName}</strong> now resolves to <code>{target}</code>.</p>
-	<p>
-		Transaction:
+<section class="cp-success" role="status" aria-live="polite">
+	<p class="cp-resolves"><strong>{fqName}</strong> resolves to <code>{target}</code></p>
+	<div class="cp-tx">
+		<span>Transaction</span>
 		{#if explorerUrl}
 			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve external block-explorer URL, not a SvelteKit route -->
-			<a href={explorerUrl} target="_blank" rel="noopener noreferrer"><code>{txHash}</code></a>
+			<a href={explorerUrl} target="_blank" rel="noopener noreferrer">{txHash}</a>
 		{:else}
 			<code>{txHash}</code>
 		{/if}
-	</p>
+	</div>
 </section>

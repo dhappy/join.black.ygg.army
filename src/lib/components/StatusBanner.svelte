@@ -17,4 +17,4 @@
 	}
 </script>
 
-<p role="status" aria-live="polite">{messages[state.kind]}</p>
+<span class="cp-live" role="status" aria-live="polite">{messages[state.kind]}</span>
