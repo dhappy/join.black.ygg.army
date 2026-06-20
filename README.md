@@ -87,6 +87,18 @@ NETWORK=mainnet CONFIRM_MAINNET=yes ACCOUNT=deployer ./test-contracts/deploy.sh
 It deploys, whitelists any addresses you pass, and prints the `PUBLIC_*` values to set. The mock is
 test-only (open `allow()`, no real name resolution) — not for production.
 
+**Production ENS registrar.** `REGISTRAR_KIND=ens` deploys `EnsSubnameRegistrar` instead, which
+registers **real ENS subnames** under a DNSSEC-imported parent (legacy ENS registry path: the
+registrar keeps node ownership and sets the `addr` record to the claimant's address). It needs the
+network's Public Resolver, and the deployed contract must be made the **owner of the parent node**
+in ENS before it can register. The app-facing interface is identical, so nothing changes client-side.
+Test on Sepolia and audit before mainnet:
+
+```sh
+REGISTRAR_KIND=ens ENS_RESOLVER=<public-resolver-address> POSTFIX=black.ygg.army \
+  NETWORK=sepolia ACCOUNT=deployer ./test-contracts/deploy.sh
+```
+
 To whitelist an address later (allow one registration for that signer) on an already-deployed
 registrar:
 

@@ -15,8 +15,15 @@
 #   PRIVATE_KEY        alternative to ACCOUNT (discouraged: appears in process args)
 #   REGISTRAR_NAME     EIP-712 domain name    (default BlackYggArmyRegistrar) — must equal PUBLIC_REGISTRAR_NAME
 #   REGISTRAR_VERSION  EIP-712 domain version (default 1)                      — must equal PUBLIC_REGISTRAR_VERSION
-#   POSTFIX            name postfix for the .env hint (default black.ygg.army)
+#   POSTFIX            name postfix / .env hint (default black.ygg.army). For REGISTRAR_KIND=ens this
+#                      is the parent ENS name; its namehash is the parentNode.
+#   REGISTRAR_KIND     mock (default, test) | ens (production: registers real ENS subnames)
+#   ENS_REGISTRY       (ens) ENS registry address (default canonical 0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e)
+#   ENS_RESOLVER       (ens, REQUIRED) the network's Public Resolver address
 #   ETHERSCAN_API_KEY  if set, verify the contract on the explorer (BASESCAN_API_KEY also accepted)
+#
+# For REGISTRAR_KIND=ens the deployed contract must be made the OWNER of the parent node in ENS
+# before it can register subnames. Audit and test on a testnet before mainnet.
 #
 # Positional args: addresses to allow() (whitelist) right after deploy.
 set -euo pipefail
@@ -83,12 +90,34 @@ if [[ -n "$API_KEY" ]]; then
 	VERIFY=(--verify --verifier etherscan --etherscan-api-key "$API_KEY")
 fi
 
-echo "Deploying MockRegistrar to ${NETWORK} (chainId=${CHAIN_ID}, ${RPC_URL})"
-OUT="$(forge create src/MockRegistrar.sol:MockRegistrar \
+REGISTRAR_KIND="${REGISTRAR_KIND:-mock}"
+case "$REGISTRAR_KIND" in
+	mock)
+		CONTRACT="src/MockRegistrar.sol:MockRegistrar"
+		CONSTRUCTOR_ARGS=("$REGISTRAR_NAME" "$REGISTRAR_VERSION")
+		;;
+	ens)
+		ENS_REGISTRY="${ENS_REGISTRY:-0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e}"
+		if [[ -z "${ENS_RESOLVER:-}" ]]; then
+			echo "error: REGISTRAR_KIND=ens requires ENS_RESOLVER (the network's Public Resolver address)" >&2
+			exit 1
+		fi
+		PARENT_NODE="$(cast namehash "$POSTFIX")"
+		CONTRACT="src/EnsSubnameRegistrar.sol:EnsSubnameRegistrar"
+		CONSTRUCTOR_ARGS=("$REGISTRAR_NAME" "$REGISTRAR_VERSION" "$ENS_REGISTRY" "$ENS_RESOLVER" "$PARENT_NODE")
+		;;
+	*)
+		echo "error: unknown REGISTRAR_KIND '$REGISTRAR_KIND' (use mock or ens)" >&2
+		exit 1
+		;;
+esac
+
+echo "Deploying ${CONTRACT##*:} (kind=${REGISTRAR_KIND}) to ${NETWORK} (chainId=${CHAIN_ID}, ${RPC_URL})"
+OUT="$(forge create "$CONTRACT" \
 	--rpc-url "$RPC_URL" \
 	"${SIGNER[@]}" \
 	--broadcast \
-	--constructor-args "$REGISTRAR_NAME" "$REGISTRAR_VERSION" \
+	--constructor-args "${CONSTRUCTOR_ARGS[@]}" \
 	"${VERIFY[@]}")"
 echo "$OUT"
 
@@ -116,6 +145,12 @@ Add to your .env:
   PUBLIC_REGISTRAR_VERSION=${REGISTRAR_VERSION}
   PUBLIC_POSTFIX=${POSTFIX}
 EOF
+
+if [[ "$REGISTRAR_KIND" == "ens" ]]; then
+	echo
+	echo "ENS: transfer ownership of '${POSTFIX}' (parentNode ${PARENT_NODE}) to ${REGISTRAR} in the"
+	echo "     ENS registry before it can register subnames. Test on Sepolia first; audit before mainnet."
+fi
 
 if [[ "$IS_MAINNET" == "1" ]]; then
 	cat <<'EOF'
