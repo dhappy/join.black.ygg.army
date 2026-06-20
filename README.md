@@ -77,6 +77,17 @@ ACCOUNT=deployer ./test-contracts/deploy.sh <signer-address-to-whitelist> ...
 It deploys, whitelists any addresses you pass, and prints the `PUBLIC_*` values to set. The mock is
 test-only (open `allow()`, no real name resolution) — not for production.
 
+To whitelist an address later (allow one registration for that signer) on an already-deployed
+registrar:
+
+```sh
+cast send <REGISTRAR_ADDRESS> "allow(address)" <SIGNER_ADDRESS> \
+  --rpc-url https://sepolia.base.org --account deployer
+```
+
+Generate a claim link (and the signer address to whitelist) with
+`node scripts/make-claim-link.mjs`.
+
 ## Security notes
 
 - The claim key travels only in the URL **fragment**, is decoded client-side, is held in memory
