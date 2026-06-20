@@ -64,12 +64,25 @@ needs the deployed registrar/Paymaster/bundler.
 `pnpm build` emits a fully static site to `build/`. Deploy those files to any static host over
 HTTPS (e.g. copy into `public_html/`). No server runtime is required.
 
+### Registrar contract (test mock)
+
+Deploy the test `MockRegistrar` with the helper script (pinned to Base Sepolia — where Biconomy's
+testnet gas tank lives, so MEE testnet sponsorship works). Import a funded deployer keystore first:
+
+```sh
+cast wallet import deployer --interactive
+ACCOUNT=deployer ./test-contracts/deploy.sh <signer-address-to-whitelist> ...
+```
+
+It deploys, whitelists any addresses you pass, and prints the `PUBLIC_*` values to set. The mock is
+test-only (open `allow()`, no real name resolution) — not for production.
+
 ## Security notes
 
 - The claim key travels only in the URL **fragment**, is decoded client-side, is held in memory
   only, and is cleared from the address bar on load. It is never sent to a server.
-- Gas sponsorship must use an **on-chain-scoped verifying Paymaster** so the static client holds no
-  secret (see `specs/.../contracts/erc4337-integration.md`).
+- Gas sponsorship uses **Biconomy MEE testnet sponsorship**; the static client holds no secret (the
+  testnet API key is a public shared value baked at build time — see `src/lib/aa/account.ts`).
 - **Risk-accepted advisory:** `GHSA-96hv-2xvq-fx4p` (`ws` server DoS, transitive via
   `viem → isows → ws`) is ignored in `pnpm.auditConfig.ignoreGhsas`. The app uses viem's HTTP
   transport only and runs no WebSocket server, so the vulnerable path is unreachable.
