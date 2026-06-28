@@ -16,6 +16,7 @@ export type ErrorCategory =
 export type ClaimState =
 	| { kind: 'LoadingLink' }
 	| { kind: 'CheckingWhitelist', signer: Address }
+	| { kind: 'MissingKey' }
 	| { kind: 'InvalidLink' }
 	| { kind: 'NotAuthorized', signer: Address }
 	| { kind: 'AlreadyRedeemed', signer: Address }
@@ -25,9 +26,9 @@ export type ClaimState =
 	| { kind: 'Success', fqName: string, target: Address, txHash: Hex }
 	| { kind: 'Failed', signer: Address, error: ErrorCategory }
 
-// A parsed link becomes either an invalid-link terminal state or a whitelist check.
+// A parsed link becomes a terminal error (no key at all vs. a malformed key) or a whitelist check.
 export function stateForLink(parsed: ParsedClaimLink): ClaimState {
-	if (!parsed.ok) return { kind: 'InvalidLink' }
+	if (!parsed.ok) return { kind: parsed.reason === 'missing' ? 'MissingKey' : 'InvalidLink' }
 	return { kind: 'CheckingWhitelist', signer: parsed.signerAddress }
 }
 

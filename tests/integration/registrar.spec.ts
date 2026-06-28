@@ -12,8 +12,9 @@ import {
 } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { foundry } from 'viem/chains'
-import { registrarAbi } from '../../src/lib/registrar/abi'
-import { signRegistration } from '../../src/lib/registrar/sign'
+import { registrarAbi } from '$lib/registrar/abi'
+import { decodeWhitelist } from '$lib/registrar/roles'
+import { signRegistration } from '$lib/registrar/sign'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const deployment = JSON.parse(readFileSync(resolve(here, '.deployment.json'), 'utf8')) as {
@@ -101,13 +102,15 @@ describe('MockRegistrar integration', () => {
 	})
 
 	it('reports whitelist status for a recovered signer', async () => {
-		const [authorized, used] = await publicClient.readContract({
+		const sentinel = await publicClient.readContract({
 			address: deployment.registrar,
 			abi: registrarAbi,
 			functionName: 'whitelist',
 			args: [privateKeyToAccount(SIGNER_KEY).address]
 		})
-		expect(authorized).toBe(true)
-		expect(used).toBe(true) // consumed by the first test
+		const status = decodeWhitelist(sentinel)
+		expect(status.authorized).toBe(true)
+		expect(status.used).toBe(true) // consumed by the first test (sentinel is now the redeem block)
+		expect(status.usedAtBlock).toBe(sentinel)
 	})
 })

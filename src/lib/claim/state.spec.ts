@@ -5,8 +5,12 @@ import { stateForLink, stateForWhitelist } from './state'
 const SIGNER = getAddress('0x70997970c51812dc3a010c7d01b50e0d17dc79c8')
 
 describe('stateForLink', () => {
-	it('maps an invalid link to InvalidLink', () => {
-		expect(stateForLink({ ok: false, reason: 'missing' })).toEqual({ kind: 'InvalidLink' })
+	it('maps a missing key to MissingKey', () => {
+		expect(stateForLink({ ok: false, reason: 'missing' })).toEqual({ kind: 'MissingKey' })
+	})
+
+	it('maps a malformed key to InvalidLink', () => {
+		expect(stateForLink({ ok: false, reason: 'malformed' })).toEqual({ kind: 'InvalidLink' })
 	})
 
 	it('maps a valid link to CheckingWhitelist', () => {

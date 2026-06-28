@@ -56,6 +56,10 @@ export default async function setup() {
 	})
 	await publicClient.waitForTransactionReceipt({ hash: allowHash })
 
+	// A used claimant is marked with the block height, which must sit above the role-flag byte
+	// (register() guards block.number >= 2**8). Mine past that before any register in the specs.
+	await publicClient.request({ method: 'anvil_mine', params: ['0x100'] } as never)
+
 	writeFileSync(
 		resolve(here, '.deployment.json'),
 		JSON.stringify({ rpc: RPC, registrar, name: NAME, version: VERSION, chainId: foundry.id })

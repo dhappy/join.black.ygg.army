@@ -25,6 +25,7 @@
 	const titles: Record<ClaimState['kind'], string> = {
 		LoadingLink: 'Verifying invitation',
 		CheckingWhitelist: 'Verifying invitation',
+		MissingKey: 'No invitation key',
 		InvalidLink: 'Invalid invitation',
 		NotAuthorized: 'Not on the allow-list',
 		AlreadyRedeemed: 'Invitation spent',
@@ -34,7 +35,7 @@
 		Success: 'Name claimed',
 		Failed: 'Registration failed'
 	}
-	const denied = ['InvalidLink', 'NotAuthorized', 'AlreadyRedeemed', 'Failed']
+	const denied = ['MissingKey', 'InvalidLink', 'NotAuthorized', 'AlreadyRedeemed', 'Failed']
 	const tone = $derived(
 		session.state.kind === 'Success' ? 'ok' : denied.includes(session.state.kind) ? 'deny' : 'work'
 	)
@@ -112,7 +113,7 @@
 
 		{#if session.state.kind === 'LoadingLink' || session.state.kind === 'CheckingWhitelist'}
 			<p class="cp-working">Reading the invitation key…</p>
-		{:else if session.state.kind === 'InvalidLink' || session.state.kind === 'NotAuthorized' || session.state.kind === 'AlreadyRedeemed'}
+		{:else if session.state.kind === 'MissingKey' || session.state.kind === 'InvalidLink' || session.state.kind === 'NotAuthorized' || session.state.kind === 'AlreadyRedeemed'}
 			<LinkState state={session.state} />
 		{:else if session.state.kind === 'Ready'}
 			<p class="cp-body">

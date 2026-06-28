@@ -90,6 +90,10 @@ for (const key of [READY_KEY, USED_KEY]) {
 	await publicClient.waitForTransactionReceipt({ hash })
 }
 
+// A used claimant is marked with the block height, which must sit above the role-flag byte
+// (register() guards block.number >= 2**8). Mine past that before consuming the USED key.
+await publicClient.request({ method: 'anvil_mine', params: ['0x100'] })
+
 // Consume the USED key's whitelist entry so it reports used=true (AlreadyRedeemed).
 const usedSignature = await privateKeyToAccount(USED_KEY).signTypedData({
 	domain: { name: NAME, version: VERSION, chainId: foundry.id, verifyingContract: registrar },

@@ -26,3 +26,13 @@ test.describe('invalid claim link', () => {
 		expect(results.violations).toEqual([])
 	})
 })
+
+test.describe('missing claim key', () => {
+	// No `#k=` at all is a distinct state from a malformed key (FR-001, FR-008, FR-011).
+	test('shows a dedicated no-key message, not the invalid-link one', async ({ page }) => {
+		await page.goto('/')
+		const alert = page.getByRole('alert')
+		await expect(alert).toBeVisible()
+		await expect(alert).toContainText(/no invitation key/i)
+	})
+})
