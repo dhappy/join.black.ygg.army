@@ -23,21 +23,21 @@ describe('stateForWhitelist', () => {
 	it('returns NotAuthorized when not whitelisted', () => {
 		expect(stateForWhitelist(SIGNER, { authorized: false, used: false })).toEqual({
 			kind: 'NotAuthorized',
-			signer: SIGNER
+			signer: SIGNER,
 		})
 	})
 
 	it('returns AlreadyRedeemed when the entry is used', () => {
 		expect(stateForWhitelist(SIGNER, { authorized: true, used: true })).toEqual({
 			kind: 'AlreadyRedeemed',
-			signer: SIGNER
+			signer: SIGNER,
 		})
 	})
 
 	it('returns Ready when authorized and unused', () => {
 		expect(stateForWhitelist(SIGNER, { authorized: true, used: false })).toEqual({
 			kind: 'Ready',
-			signer: SIGNER
+			signer: SIGNER,
 		})
 	})
 })

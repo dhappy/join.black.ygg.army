@@ -70,13 +70,13 @@ for (let attempt = 0; attempt < 100; attempt++) {
 const wallet = createWalletClient({
 	account: privateKeyToAccount(DEPLOYER),
 	chain: foundry,
-	transport: http(RPC)
+	transport: http(RPC),
 })
 
 const deployHash = await wallet.deployContract({
 	abi: artifact.abi,
 	bytecode: artifact.bytecode.object,
-	args: [NAME, VERSION]
+	args: [NAME, VERSION],
 })
 const registrar = (await publicClient.waitForTransactionReceipt({ hash: deployHash })).contractAddress
 
@@ -85,7 +85,7 @@ for (const key of [READY_KEY, USED_KEY]) {
 		address: registrar,
 		abi: artifact.abi,
 		functionName: 'allow',
-		args: [privateKeyToAccount(key).address]
+		args: [privateKeyToAccount(key).address],
 	})
 	await publicClient.waitForTransactionReceipt({ hash })
 }
@@ -99,13 +99,13 @@ const usedSignature = await privateKeyToAccount(USED_KEY).signTypedData({
 	domain: { name: NAME, version: VERSION, chainId: foundry.id, verifyingContract: registrar },
 	types: { Registration: [{ name: 'label', type: 'string' }, { name: 'target', type: 'address' }] },
 	primaryType: 'Registration',
-	message: { label: 'taken', target: TARGET }
+	message: { label: 'taken', target: TARGET },
 })
 const consumeHash = await wallet.writeContract({
 	address: registrar,
 	abi: artifact.abi,
 	functionName: 'register',
-	args: ['taken', TARGET, usedSignature]
+	args: ['taken', TARGET, usedSignature],
 })
 await publicClient.waitForTransactionReceipt({ hash: consumeHash })
 
@@ -119,11 +119,11 @@ const buildEnv = {
 	PUBLIC_REGISTRAR_ADDRESS: registrar,
 	PUBLIC_POSTFIX: POSTFIX,
 	PUBLIC_REGISTRAR_NAME: NAME,
-	PUBLIC_REGISTRAR_VERSION: VERSION
+	PUBLIC_REGISTRAR_VERSION: VERSION,
 }
 spawnSync('pnpm', ['exec', 'vite', 'build'], { stdio: 'inherit', env: buildEnv })
 vite = spawn(
 	'pnpm',
 	['exec', 'sirv', 'build', '--port', '6666', '--host', '127.0.0.1', '--single', '--quiet'],
-	{ stdio: 'ignore' }
+	{ stdio: 'ignore' },
 )

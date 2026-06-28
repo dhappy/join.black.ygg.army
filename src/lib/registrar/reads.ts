@@ -12,7 +12,7 @@ export {
 	ADMIN,
 	SUPERADMIN,
 	FLAG_MASK,
-	type WhitelistStatus
+	type WhitelistStatus,
 } from './roles'
 
 // Name availability under the postfix (FR-009).
@@ -22,7 +22,7 @@ export async function isNameAvailable(label: string): Promise<boolean> {
 		address: cfg.registrarAddress as Address,
 		abi: registrarAbi,
 		functionName: 'available',
-		args: [label]
+		args: [label],
 	})
 }
 
@@ -33,7 +33,7 @@ export async function readWhitelist(account: Address): Promise<ReturnType<typeof
 		address: cfg.registrarAddress as Address,
 		abi: registrarAbi,
 		functionName: 'whitelist',
-		args: [account]
+		args: [account],
 	})
 	return decodeWhitelist(sentinel)
 }

@@ -9,7 +9,7 @@ const EXPLORERS: Record<number, string> = {
 	42161: 'https://arbiscan.io',
 	421614: 'https://sepolia.arbiscan.io',
 	137: 'https://polygonscan.com',
-	80002: 'https://amoy.polygonscan.com'
+	80002: 'https://amoy.polygonscan.com',
 }
 
 // Build a transaction URL on the appropriate explorer for `chainId`, or null when unknown. An

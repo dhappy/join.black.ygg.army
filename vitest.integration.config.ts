@@ -6,12 +6,12 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
 	resolve: {
 		// Mirror SvelteKit's $lib alias so specs import app code as $lib/... (not ../../src/lib/...).
-		alias: { $lib: fileURLToPath(new URL('./src/lib', import.meta.url)) }
+		alias: { $lib: fileURLToPath(new URL('./src/lib', import.meta.url)) },
 	},
 	test: {
 		globalSetup: ['./tests/integration/globalSetup.ts'],
 		include: ['tests/integration/**/*.spec.ts'],
 		testTimeout: 30000,
-		hookTimeout: 60000
-	}
+		hookTimeout: 60000,
+	},
 })

@@ -36,7 +36,7 @@ describe('parseAddressList', () => {
 		expect(result.valid).toEqual([getAddress(A)])
 		expect(result.invalid).toEqual([
 			{ line: 2, raw: 'nope' },
-			{ line: 3, raw: '0x1234' }
+			{ line: 3, raw: '0x1234' },
 		])
 	})
 

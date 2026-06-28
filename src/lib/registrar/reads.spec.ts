@@ -10,7 +10,7 @@ describe('decodeWhitelist', () => {
 			isAdmin: false,
 			isSuperadmin: false,
 			authorized: false,
-			used: false
+			used: false,
 		})
 		expect(s.usedAtBlock).toBeUndefined()
 	})

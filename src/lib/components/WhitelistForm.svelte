@@ -6,7 +6,7 @@
 		onsubmit,
 		submitLabel,
 		busy = false,
-		disabled = false
+		disabled = false,
 	}: {
 		onsubmit: (addresses: Address[]) => void
 		submitLabel: string

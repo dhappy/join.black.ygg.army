@@ -37,6 +37,6 @@ export function decodeWhitelist(sentinel: bigint): WhitelistStatus {
 		// stays true and `used` true → the claim flow reports AlreadyRedeemed, not NotAuthorized.
 		authorized: isClaimant || used,
 		used,
-		usedAtBlock: used ? sentinel : undefined
+		usedAtBlock: used ? sentinel : undefined,
 	}
 }

@@ -56,8 +56,10 @@ contract EnsSubnameRegistrar {
 	mapping(address => uint256) public whitelist;
 
 	IENS public immutable ens;
-	address public immutable resolver;
 	bytes32 public immutable parentNode;
+	// Set post-deploy (not a constructor arg) so the deploy initcode is identical across chains —
+	// enabling the same CREATE2 address on Mainnet + Sepolia despite their different resolvers.
+	address public resolver;
 
 	bytes32 private constant REGISTRATION_TYPEHASH =
 		keccak256("Registration(string label,address target)");
@@ -68,6 +70,7 @@ contract EnsSubnameRegistrar {
 	event AdminSet(address indexed account);
 	event SuperadminSet(address indexed account);
 	event Denied(address indexed account, uint256 flags);
+	event ResolverSet(address indexed resolver);
 	event Registered(
 		bytes32 indexed node,
 		string label,
@@ -93,16 +96,19 @@ contract EnsSubnameRegistrar {
 		_;
 	}
 
+	// `superadmin` is an explicit arg, not msg.sender: under a CREATE2 factory deploy msg.sender is
+	// the factory, so seeding msg.sender would brick admin. Pass the same address on every chain to
+	// keep the deterministic CREATE2 address identical.
 	constructor(
 		string memory name,
 		string memory version,
 		address ensRegistry,
-		address resolver_,
-		bytes32 parentNode_
+		bytes32 parentNode_,
+		address superadmin
 	) {
-		whitelist[msg.sender] = SUPERADMIN_ROLE;
+		require(superadmin != address(0), "zero superadmin");
+		whitelist[superadmin] = SUPERADMIN_ROLE;
 		ens = IENS(ensRegistry);
-		resolver = resolver_;
 		parentNode = parentNode_;
 		DOMAIN_SEPARATOR = keccak256(
 			abi.encode(
@@ -115,6 +121,14 @@ contract EnsSubnameRegistrar {
 				address(this)
 			)
 		);
+	}
+
+	/// @notice Superadmin: set the ENS Public Resolver for new subnames. Kept out of the constructor
+	/// so the deploy initcode (and thus the CREATE2 address) matches across chains; MUST be set before
+	/// the first register().
+	function setResolver(address resolver_) external onlySuperadmin {
+		resolver = resolver_;
+		emit ResolverSet(resolver_);
 	}
 
 	/// @notice Whitelister: mark each account a whitelisted, unused claimant.
@@ -172,6 +186,7 @@ contract EnsSubnameRegistrar {
 
 	function register(string calldata label, address target, bytes calldata signature) external {
 		require(block.number >= FLAG_MASK, "chain too young"); // keeps used-block out of flag space
+		require(resolver != address(0), "resolver unset"); // setResolver() must run after deploy
 		bytes32 structHash = keccak256(
 			abi.encode(REGISTRATION_TYPEHASH, keccak256(bytes(label)), target)
 		);

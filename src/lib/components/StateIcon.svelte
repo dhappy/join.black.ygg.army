@@ -7,7 +7,7 @@
 		kind === 'LoadingLink' ||
 			kind === 'CheckingWhitelist' ||
 			kind === 'Submitting' ||
-			kind === 'Pending'
+			kind === 'Pending',
 	)
 </script>
 

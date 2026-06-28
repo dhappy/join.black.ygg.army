@@ -36,7 +36,7 @@ export function stateForLink(parsed: ParsedClaimLink): ClaimState {
 // reopen case, since a consumed entry reports used=true → AlreadyRedeemed).
 export function stateForWhitelist(
 	signer: Address,
-	whitelist: { authorized: boolean, used: boolean }
+	whitelist: { authorized: boolean, used: boolean },
 ): ClaimState {
 	if (!whitelist.authorized) return { kind: 'NotAuthorized', signer }
 	if (whitelist.used) return { kind: 'AlreadyRedeemed', signer }

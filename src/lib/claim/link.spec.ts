@@ -13,7 +13,7 @@ describe('parseClaimLink', () => {
 		expect(parseClaimLink(`#k=${encoded}`)).toEqual({
 			ok: true,
 			privateKey: KEY_HEX,
-			signerAddress: expected.address
+			signerAddress: expected.address,
 		})
 	})
 
@@ -35,7 +35,7 @@ describe('parseClaimLink', () => {
 describe('stripFragment', () => {
 	it('removes the fragment (and the key) from an href', () => {
 		expect(stripFragment('https://join.black.ygg.army/?a=1#k=secret')).toBe(
-			'https://join.black.ygg.army/?a=1'
+			'https://join.black.ygg.army/?a=1',
 		)
 	})
 

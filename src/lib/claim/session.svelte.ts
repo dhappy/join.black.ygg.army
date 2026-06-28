@@ -33,6 +33,6 @@ export function createClaimSession() {
 		},
 		retry() {
 			if (state.kind === 'Failed') state = { kind: 'Ready', signer: state.signer }
-		}
+		},
 	}
 }

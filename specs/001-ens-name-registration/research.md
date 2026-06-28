@@ -28,32 +28,32 @@ alternatives.
 
 ## 3. Account abstraction / gasless delivery
 
-- **Decision**: **Biconomy MEE** via `@biconomy/abstractjs`. The embedded key signs a **Nexus** smart
-  account (`toMultichainNexusAccount`); the claim is submitted as a single sponsored **MEE
-  supertransaction** (`meeClient.execute`) whose instruction calls
-  `registrar.register(label, target, signature)`, then awaited with `waitForSupertransactionReceipt`.
+- **Decision**: **Alchemy Account Kit** via `@account-kit/smart-contracts` + `@account-kit/infra` +
+  `@aa-sdk/core`. The embedded key (`LocalAccountSigner.privateKeyToAccountSigner`) owns a **Modular
+  Account v2** (`createModularAccountV2Client`); the claim is submitted as a single sponsored
+  **UserOperation** (`sendUserOperation({ uo: { target, data } })`) calling
+  `registrar.register(label, target, signature)`, then awaited with `waitForUserOperationTransaction`.
 - **Rationale**: The clarified model (registrar recovers the `(name, address)` signer from calldata;
   AA is only the gasless transport) means the *sender* identity is irrelevant to authorization — so
-  the simplest sender is a Nexus account owned by the same embedded key, requiring the claimant to
-  hold exactly one secret. Biconomy MEE supplies the bundler + gas sponsorship and the SDK handles
-  account deployment, execution, and receipt waiting.
-- **Alternatives considered**: viem bundler + `permissionless` Safe account with a self-hosted
-  verifying Paymaster (rejected: requires standing up and funding our own bundler + Paymaster;
-  Biconomy testnet sponsorship is out-of-the-box); registrar trusting `msg.sender` (rejected in
-  clarify Q3); a project-run relayer/meta-tx backend (rejected: adds a backend); EOA + user pays gas
-  (rejected by clarify Q1 — must be gasless).
+  the simplest sender is a Modular Account owned by the same embedded key, requiring the claimant to
+  hold exactly one secret. Alchemy supplies the bundler + the verifying Paymaster (Gas Manager) and
+  the SDK handles account deployment, execution, and tx waiting.
+- **Alternatives considered**: Biconomy MEE testnet sponsorship (the prior implementation; switched
+  to Alchemy per request); viem bundler + `permissionless` Safe account with a self-hosted
+  verifying Paymaster (rejected: requires standing up and funding our own bundler + Paymaster);
+  registrar trusting `msg.sender` (rejected in clarify Q3); a project-run relayer/meta-tx backend
+  (rejected: adds a backend); EOA + user pays gas (rejected by clarify Q1 — must be gasless).
 
-## 4. Gas sponsorship model (Biconomy MEE testnet sponsorship)
+## 4. Gas sponsorship model (Alchemy Gas Manager)
 
-- **Decision**: Use **Biconomy MEE testnet sponsorship** — `createMeeClient` with
-  `getDefaultMEENetworkUrl(true)` / `getDefaultMEENetworkApiKey(true)`, and
-  `execute({ sponsorship: true, sponsorshipOptions: { url, gasTank: getDefaultMeeGasTank(true) } })`.
-  Gas is covered by Biconomy's shared testnet gas tank (on Base Sepolia, chain 84532); no dashboard,
-  no bundler/Paymaster URLs, and no client-held *secret* (the testnet API key is a public shared
-  value baked at build time).
-- **Rationale**: Keeps the client static and backend-free (Principle II/III) while removing the need
-  to operate and fund our own bundler + verifying Paymaster. Production switches to a configured MEE
-  node URL + API key + a project gas tank (Biconomy dashboard) — a config change, not a code change.
+- **Decision**: Use an **Alchemy Gas Manager** sponsorship policy. The Modular Account client is
+  built with `transport: alchemy({ apiKey: PUBLIC_ALCHEMY_API_KEY })` and `policyId:
+  PUBLIC_GAS_POLICY_ID`; passing the `policyId` makes the client request sponsorship automatically,
+  so the claimant pays nothing. The target chain is resolved by `alchemyChain(chainId)`.
+- **Rationale**: Keeps the client static and backend-free (Principle II/III) while using Alchemy's
+  hosted bundler + verifying Paymaster. Because there is no backend, the API key and policy id ship
+  in the bundle — so the key MUST be domain-allowlisted and the policy MUST be scoped (sender/contract
+  + spend caps). Production is the same code with a funded, scoped policy — a config change.
 - **Alternatives considered**: self-hosted ERC-4337 bundler + on-chain-scoped verifying Paymaster
   (rejected: infra to run and fund; more moving parts than testnet sponsorship); embedding a secret
   Paymaster API key in the bundle (rejected: secret leakage); a backend relayer (rejected: no-backend).

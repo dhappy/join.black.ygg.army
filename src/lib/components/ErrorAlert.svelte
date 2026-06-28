@@ -7,7 +7,7 @@
 	const text: Partial<Record<ErrorCategory, string>> = {
 		NameTaken: 'That name is already taken. Please choose another.',
 		SponsorshipFailed: 'Gas sponsorship is unavailable right now. Please try again shortly.',
-		SubmissionFailed: 'The registration could not be submitted. Please try again.'
+		SubmissionFailed: 'The registration could not be submitted. Please try again.',
 	}
 </script>
 

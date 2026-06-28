@@ -28,7 +28,7 @@ export const WHITELIST_ACTIONS: WhitelistAction[] = [
 	{ id: 'revoke-claimant', label: 'Revoke claimant', verb: 'revoke', flag: CLAIMANT, functionName: 'deny', requires: WHITELISTER, blurb: 'Remove the claimant role from each address.' },
 	{ id: 'revoke-whitelister', label: 'Revoke whitelister', verb: 'revoke', flag: WHITELISTER, functionName: 'deny', requires: ADMIN, blurb: 'Remove the whitelister role from each address.' },
 	{ id: 'revoke-admin', label: 'Revoke admin', verb: 'revoke', flag: ADMIN, functionName: 'deny', requires: SUPERADMIN, blurb: 'Remove the admin role from each address.' },
-	{ id: 'revoke-superadmin', label: 'Revoke superadmin', verb: 'revoke', flag: SUPERADMIN, functionName: 'deny', requires: SUPERADMIN, blurb: 'Remove the superadmin role from each address.' }
+	{ id: 'revoke-superadmin', label: 'Revoke superadmin', verb: 'revoke', flag: SUPERADMIN, functionName: 'deny', requires: SUPERADMIN, blurb: 'Remove the superadmin role from each address.' },
 ]
 
 // Whether a status holds a given role flag (cumulative: admins/superadmins also hold lower roles).

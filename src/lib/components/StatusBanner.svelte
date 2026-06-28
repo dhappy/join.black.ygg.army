@@ -14,7 +14,7 @@
 		Submitting: 'Submitting your registration…',
 		Pending: 'Waiting for confirmation…',
 		Success: 'Your name is registered.',
-		Failed: 'Something went wrong.'
+		Failed: 'Something went wrong.',
 	}
 </script>
 

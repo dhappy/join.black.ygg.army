@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { onMount } from 'svelte'
 	import type { Address } from 'viem'
 	import { loadConfig } from '$lib/chain/config'
+	import { activeChainId } from '$lib/chain/active.svelte'
 	import { explorerTxUrl } from '$lib/chain/explorer'
 	import { connectWallet, type Connection } from '$lib/admin/wallet'
 	import { runAction } from '$lib/admin/whitelist'
@@ -14,9 +14,17 @@
 	let phase = $state<Phase>('idle')
 	let connection = $state<Connection | null>(null)
 	let role = $state<WhitelistStatus | null>(null)
-	let chainId = $state(0)
-	let explorerBase = $state<string | undefined>(undefined)
-	let postfix = $state('')
+	// Config is derived so a chain switch updates the display + explorer links.
+	const cfg = $derived.by(() => {
+		try {
+			return loadConfig()
+		} catch {
+			return null
+		}
+	})
+	const postfix = $derived(cfg?.postfix ?? '')
+	const chainId = $derived(cfg?.chainId ?? 1)
+	const explorerBase = $derived(cfg?.explorerUrl)
 
 	let actionId = $state(WHITELIST_ACTIONS[0].id)
 	let error = $state('')
@@ -32,20 +40,23 @@
 		role.isSuperadmin ? 'superadmin' :
 		role.isAdmin ? 'admin' :
 		role.isWhitelister ? 'whitelister' :
-		'no role'
+		'no role',
 	)
 	const txUrl = $derived(txHash ? explorerTxUrl(chainId, txHash, explorerBase) : null)
 	const tone = $derived(phase === 'done' ? 'ok' : phase === 'error' ? 'deny' : 'work')
 
-	onMount(() => {
-		try {
-			const cfg = loadConfig()
-			postfix = cfg.postfix
-			chainId = cfg.chainId
-			explorerBase = cfg.explorerUrl
-		} catch {
-			/* config-less build (CI verify) */
+	// Reset the wallet connection when the target chain changes — the connected client is bound to
+	// the old network; reconnecting re-runs the chain switch/add prompt on the new one.
+	let lastChain = 0
+	$effect(() => {
+		const id = activeChainId()
+		if(lastChain && lastChain !== id && connection) {
+			connection = null
+			role = null
+			phase = 'idle'
+			error = ''
 		}
+		lastChain = id
 	})
 
 	async function connect() {
@@ -88,7 +99,7 @@
 
 	function connectError(e: unknown): string {
 		const msg = e instanceof Error ? e.message : ''
-		if (msg === 'NoWallet') return 'No injected wallet found. Install MetaMask, Rabby or similar.'
+		if (msg === 'NoWallet') return 'No injected wallet found. Use Frame (Companion extension), MetaMask, Rabby or similar.'
 		if (msg === 'NoAccount') return 'No account was shared by the wallet.'
 		return 'Could not connect the wallet (request rejected or wrong network).'
 	}

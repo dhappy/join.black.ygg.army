@@ -8,7 +8,7 @@ import {
 	getAddress,
 	http,
 	parseEventLogs,
-	type Address
+	type Address,
 } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { foundry } from 'viem/chains'
@@ -44,7 +44,7 @@ function sign(privateKey: `0x${string}`, label: string) {
 		chainId: deployment.chainId,
 		verifyingContract: deployment.registrar,
 		label,
-		target: TARGET
+		target: TARGET,
 	})
 }
 
@@ -56,7 +56,7 @@ describe('MockRegistrar integration', () => {
 			address: deployment.registrar,
 			abi: registrarAbi,
 			functionName: 'register',
-			args: ['alice', TARGET, signature]
+			args: ['alice', TARGET, signature],
 		})
 		const hash = await walletClient.writeContract(request)
 		const receipt = await publicClient.waitForTransactionReceipt({ hash })
@@ -70,7 +70,7 @@ describe('MockRegistrar integration', () => {
 			address: deployment.registrar,
 			abi: registrarAbi,
 			functionName: 'available',
-			args: ['alice']
+			args: ['alice'],
 		})
 		expect(available).toBe(false)
 	})
@@ -83,8 +83,8 @@ describe('MockRegistrar integration', () => {
 				address: deployment.registrar,
 				abi: registrarAbi,
 				functionName: 'register',
-				args: ['bob', TARGET, signature]
-			})
+				args: ['bob', TARGET, signature],
+			}),
 		).rejects.toThrow(/already used/)
 	})
 
@@ -96,8 +96,8 @@ describe('MockRegistrar integration', () => {
 				address: deployment.registrar,
 				abi: registrarAbi,
 				functionName: 'register',
-				args: ['charlie', TARGET, signature]
-			})
+				args: ['charlie', TARGET, signature],
+			}),
 		).rejects.toThrow(/not whitelisted/)
 	})
 
@@ -106,7 +106,7 @@ describe('MockRegistrar integration', () => {
 			address: deployment.registrar,
 			abi: registrarAbi,
 			functionName: 'whitelist',
-			args: [privateKeyToAccount(SIGNER_KEY).address]
+			args: [privateKeyToAccount(SIGNER_KEY).address],
 		})
 		const status = decodeWhitelist(sentinel)
 		expect(status.authorized).toBe(true)

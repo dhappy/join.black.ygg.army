@@ -5,7 +5,7 @@
 		fqName,
 		target,
 		txHash,
-		explorerUrl
+		explorerUrl,
 	}: { fqName: string, target: Address, txHash: Hex, explorerUrl: string | null } = $props()
 </script>
 

@@ -8,7 +8,7 @@
 		MissingKey: 'This link has no invitation key. Open the full link exactly as you were given it — the part after the # must be present.',
 		InvalidLink: 'This invitation link is invalid or incomplete. Please check the link you were given.',
 		NotAuthorized: 'This link is not on the allow-list, so it cannot be used to register a name.',
-		AlreadyRedeemed: 'This invitation has already been used to register a name.'
+		AlreadyRedeemed: 'This invitation has already been used to register a name.',
 	}
 </script>
 

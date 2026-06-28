@@ -1,43 +1,22 @@
-import { http } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import {
-	DEFAULT_MEE_VERSION,
-	createMeeClient,
-	getDefaultMEENetworkApiKey,
-	getDefaultMEENetworkUrl,
-	getDefaultMeeGasTank,
-	getMEEVersion,
-	toMultichainNexusAccount
-} from '@biconomy/abstractjs'
+import { LocalAccountSigner } from '@aa-sdk/core'
+import { alchemy } from '@account-kit/infra'
+import { createModularAccountV2Client } from '@account-kit/smart-contracts'
 import type { Hex } from 'viem'
-import { appChain } from '../chain/client'
+import { alchemyChain } from '../chain/client'
 import { loadConfig } from '../chain/config'
 
-// Gasless via Biconomy MEE testnet sponsorship (https://docs.biconomy.io/gasless-apps/testnet-sponsorship).
-// The embedded key signs a Nexus smart account; the SDK's staging MEE network + shared testnet gas
-// tank sponsor gas out of the box — no bundler/Paymaster URLs or dashboard setup required.
-export async function createSponsoredMeeClient(privateKey: Hex) {
-	const account = await toMultichainNexusAccount({
-		chainConfigurations: [
-			{
-				chain: appChain(),
-				transport: http(loadConfig().rpcUrl),
-				version: getMEEVersion(DEFAULT_MEE_VERSION)
-			}
-		],
-		signer: privateKeyToAccount(privateKey)
-	})
-	return createMeeClient({
-		account,
-		url: getDefaultMEENetworkUrl(true),
-		apiKey: getDefaultMEENetworkApiKey(true)
-	})
-}
+// Gasless via Alchemy: a Modular Account v2 owned by the embedded key sends the UserOperation, with
+// gas sponsored by an Alchemy Gas Manager policy (policyId). The registrar recovers the
+// (label, target) signer from the calldata signature, so this account being a distinct address is
+// fine — it's only the gasless transport (clarify Q3).
+export async function createSponsoredClient(privateKey: Hex) {
+	const cfg = loadConfig()
+	if (!cfg.alchemyApiKey || !cfg.gasPolicyId) throw new Error('MissingAlchemyConfig')
 
-// Testnet sponsorship options for meeClient.execute({ sponsorship: true, sponsorshipOptions }).
-export function testnetSponsorshipOptions() {
-	return {
-		url: getDefaultMEENetworkUrl(true),
-		gasTank: getDefaultMeeGasTank(true)
-	}
+	return createModularAccountV2Client({
+		chain: alchemyChain(cfg.chainId),
+		transport: alchemy({ apiKey: cfg.alchemyApiKey }),
+		signer: LocalAccountSigner.privateKeyToAccountSigner(privateKey),
+		policyId: cfg.gasPolicyId,
+	})
 }

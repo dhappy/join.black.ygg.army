@@ -16,7 +16,7 @@ const params: SignRegistrationParams = {
 	chainId: 8453,
 	verifyingContract: REGISTRAR,
 	label: 'alice',
-	target: TARGET
+	target: TARGET,
 }
 
 describe('signRegistration', () => {
@@ -27,7 +27,7 @@ describe('signRegistration', () => {
 			types: registrationTypes,
 			primaryType: 'Registration',
 			message: { label: params.label, target: params.target },
-			signature
+			signature,
 		})
 		expect(recovered).toBe(privateKeyToAccount(KEY).address)
 	})

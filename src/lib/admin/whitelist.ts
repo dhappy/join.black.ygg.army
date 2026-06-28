@@ -15,7 +15,7 @@ export async function runAction(
 	client: WalletClient,
 	account: Address,
 	action: WhitelistAction,
-	accounts: Address[]
+	accounts: Address[],
 ): Promise<ActionResult> {
 	if (accounts.length === 0) throw new Error('EmptyList')
 	const cfg = loadConfig()
@@ -23,7 +23,7 @@ export async function runAction(
 		account,
 		chain: appChain(),
 		address: cfg.registrarAddress as Address,
-		abi: registrarAbi
+		abi: registrarAbi,
 	} as const
 
 	const txHash =

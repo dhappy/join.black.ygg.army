@@ -33,7 +33,7 @@ export async function connectWallet(): Promise<Connection> {
 async function ensureChain(
 	provider: NonNullable<Window['ethereum']>,
 	chainId: number,
-	rpcUrl: string
+	rpcUrl: string,
 ) {
 	const hexId = numberToHex(chainId)
 	try {
@@ -48,9 +48,9 @@ async function ensureChain(
 						chainId: hexId,
 						chainName: `chain-${chainId}`,
 						nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-						rpcUrls: [rpcUrl]
-					}
-				]
+						rpcUrls: [rpcUrl],
+					},
+				],
 			})
 			return
 		}

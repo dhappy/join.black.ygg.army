@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { parseClaimLink, stripFragment } from '$lib/claim/link'
+	import type { Address } from 'viem'
+	import { parseClaimLink, stripFragment, type ParsedClaimLink } from '$lib/claim/link'
 	import { createClaimSession } from '$lib/claim/session.svelte'
 	import { readWhitelist } from '$lib/registrar/reads'
 	import { registerName } from '$lib/claim/register'
 	import { normalizeLabel } from '$lib/ens/normalize'
 	import { validateAddress } from '$lib/ens/address'
 	import { loadConfig } from '$lib/chain/config'
+	import { activeChainId } from '$lib/chain/active.svelte'
 	import { explorerTxUrl } from '$lib/chain/explorer'
 	import type { ClaimState, ErrorCategory } from '$lib/claim/state'
 	import StatusBanner from '$lib/components/StatusBanner.svelte'
@@ -18,9 +20,19 @@
 	import StateIcon from '$lib/components/StateIcon.svelte'
 
 	const session = createClaimSession()
-	let postfix = $state('')
-	let chainId = $state(0)
-	let explorerBase = $state<string | undefined>(undefined)
+	let parsed = $state<ParsedClaimLink | null>(null)
+
+	// Config is derived so a chain switch re-resolves postfix / chain id / explorer base.
+	const cfg = $derived.by(() => {
+		try {
+			return loadConfig()
+		} catch {
+			return null
+		}
+	})
+	const postfix = $derived(cfg?.postfix ?? '')
+	const chainId = $derived(cfg?.chainId ?? 1)
+	const explorerBase = $derived(cfg?.explorerUrl)
 
 	const titles: Record<ClaimState['kind'], string> = {
 		LoadingLink: 'Verifying invitation',
@@ -33,36 +45,39 @@
 		Submitting: 'Registering',
 		Pending: 'Registering',
 		Success: 'Name claimed',
-		Failed: 'Registration failed'
+		Failed: 'Registration failed',
 	}
 	const denied = ['MissingKey', 'InvalidLink', 'NotAuthorized', 'AlreadyRedeemed', 'Failed']
 	const tone = $derived(
-		session.state.kind === 'Success' ? 'ok' : denied.includes(session.state.kind) ? 'deny' : 'work'
+		session.state.kind === 'Success' ? 'ok' : denied.includes(session.state.kind) ? 'deny' : 'work',
 	)
 	const signer = $derived('signer' in session.state ? session.state.signer : null)
 	const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`
 
-	onMount(async () => {
-		try {
-			const cfg = loadConfig()
-			postfix = cfg.postfix
-			chainId = cfg.chainId
-			explorerBase = cfg.explorerUrl
-		} catch {
-			postfix = ''
-		}
-		const parsed = parseClaimLink(window.location.hash)
+	onMount(() => {
+		const link = parseClaimLink(window.location.hash)
 		history.replaceState(null, '', stripFragment(window.location.href))
-		session.fromLink(parsed)
-		if (parsed.ok) {
-			try {
-				const whitelist = await readWhitelist(parsed.signerAddress)
-				session.resolveWhitelist(parsed.signerAddress, whitelist)
-			} catch {
-				session.failed(parsed.signerAddress, 'SubmissionFailed')
-			}
-		}
+		parsed = link
 	})
+
+	// Resolve the link against the active chain, and re-resolve on a chain switch — the same signer
+	// may be whitelisted on one deployment but not another.
+	$effect(() => {
+		activeChainId() // dependency: re-run when the target chain changes
+		const link = parsed
+		if(!link) return
+		session.fromLink(link)
+		if(link.ok) void resolve(link.signerAddress)
+	})
+
+	async function resolve(signerAddress: Address) {
+		try {
+			const whitelist = await readWhitelist(signerAddress)
+			session.resolveWhitelist(signerAddress, whitelist)
+		} catch {
+			session.failed(signerAddress, 'SubmissionFailed')
+		}
+	}
 
 	async function submit(label: string, address: string) {
 		const current = session.state
@@ -77,7 +92,7 @@
 			const result = await registerName({
 				privateKey: key,
 				label: normalized.normalized,
-				target: target.address
+				target: target.address,
 			})
 			session.succeeded(result.fqName, target.address, result.txHash)
 		} catch (error) {

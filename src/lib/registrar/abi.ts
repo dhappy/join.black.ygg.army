@@ -11,14 +11,14 @@ export const registrarAbi = [
 		name: 'whitelist',
 		stateMutability: 'view',
 		inputs: [{ name: 'account', type: 'address' }],
-		outputs: [{ name: '', type: 'uint256' }]
+		outputs: [{ name: '', type: 'uint256' }],
 	},
 	{
 		type: 'function',
 		name: 'available',
 		stateMutability: 'view',
 		inputs: [{ name: 'label', type: 'string' }],
-		outputs: [{ name: '', type: 'bool' }]
+		outputs: [{ name: '', type: 'bool' }],
 	},
 	{
 		// Whitelister: mark each account a whitelisted, unused claimant.
@@ -26,7 +26,7 @@ export const registrarAbi = [
 		name: 'bulkWhitelist',
 		stateMutability: 'nonpayable',
 		inputs: [{ name: 'accounts', type: 'address[]' }],
-		outputs: []
+		outputs: [],
 	},
 	{
 		// Admin: grant each account the whitelister role.
@@ -34,7 +34,7 @@ export const registrarAbi = [
 		name: 'bulkSetWhitelisters',
 		stateMutability: 'nonpayable',
 		inputs: [{ name: 'accounts', type: 'address[]' }],
-		outputs: []
+		outputs: [],
 	},
 	{
 		// Superadmin: grant each account the admin role.
@@ -42,7 +42,7 @@ export const registrarAbi = [
 		name: 'bulkSetAdmins',
 		stateMutability: 'nonpayable',
 		inputs: [{ name: 'accounts', type: 'address[]' }],
-		outputs: []
+		outputs: [],
 	},
 	{
 		// Superadmin: grant each account the superadmin role.
@@ -50,7 +50,7 @@ export const registrarAbi = [
 		name: 'bulkSetSuperadmins',
 		stateMutability: 'nonpayable',
 		inputs: [{ name: 'accounts', type: 'address[]' }],
-		outputs: []
+		outputs: [],
 	},
 	{
 		// Revoke role flags from each account (caller must be able to grant those flags).
@@ -59,9 +59,9 @@ export const registrarAbi = [
 		stateMutability: 'nonpayable',
 		inputs: [
 			{ name: 'accounts', type: 'address[]' },
-			{ name: 'flags', type: 'uint256' }
+			{ name: 'flags', type: 'uint256' },
 		],
-		outputs: []
+		outputs: [],
 	},
 	{
 		type: 'function',
@@ -70,37 +70,37 @@ export const registrarAbi = [
 		inputs: [
 			{ name: 'label', type: 'string' },
 			{ name: 'target', type: 'address' },
-			{ name: 'signature', type: 'bytes' }
+			{ name: 'signature', type: 'bytes' },
 		],
-		outputs: []
+		outputs: [],
 	},
 	{
 		type: 'event',
 		name: 'Whitelisted',
-		inputs: [{ name: 'account', type: 'address', indexed: true }]
+		inputs: [{ name: 'account', type: 'address', indexed: true }],
 	},
 	{
 		type: 'event',
 		name: 'WhitelisterSet',
-		inputs: [{ name: 'account', type: 'address', indexed: true }]
+		inputs: [{ name: 'account', type: 'address', indexed: true }],
 	},
 	{
 		type: 'event',
 		name: 'AdminSet',
-		inputs: [{ name: 'account', type: 'address', indexed: true }]
+		inputs: [{ name: 'account', type: 'address', indexed: true }],
 	},
 	{
 		type: 'event',
 		name: 'SuperadminSet',
-		inputs: [{ name: 'account', type: 'address', indexed: true }]
+		inputs: [{ name: 'account', type: 'address', indexed: true }],
 	},
 	{
 		type: 'event',
 		name: 'Denied',
 		inputs: [
 			{ name: 'account', type: 'address', indexed: true },
-			{ name: 'flags', type: 'uint256', indexed: false }
-		]
+			{ name: 'flags', type: 'uint256', indexed: false },
+		],
 	},
 	{
 		type: 'event',
@@ -109,7 +109,7 @@ export const registrarAbi = [
 			{ name: 'node', type: 'bytes32', indexed: true },
 			{ name: 'label', type: 'string', indexed: false },
 			{ name: 'target', type: 'address', indexed: true },
-			{ name: 'registrant', type: 'address', indexed: true }
-		]
-	}
+			{ name: 'registrant', type: 'address', indexed: true },
+		],
+	},
 ] as const
