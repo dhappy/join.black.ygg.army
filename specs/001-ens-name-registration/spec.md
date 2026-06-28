@@ -195,10 +195,11 @@ claimant can recover without losing their link.
 
 - The application stack is predetermined as a Svelte + TypeScript single-page app (project
   constraint stated by the requester).
-- Gas is sponsored via **Biconomy MEE testnet sponsorship** (`@biconomy/abstractjs`), an ERC-4337
-  account-abstraction model: the claimant submits a sponsored MEE supertransaction rather than paying
-  gas. (Realizes the clarified "ERC-4337 Paymaster" decision; Biconomy supplies the bundler +
-  sponsorship out of the box — no Paymaster URL or dashboard. The earlier "ERC-4773" was a typo.)
+- Gas is sponsored via **Alchemy Account Kit + Gas Manager** (`@account-kit/*`, `@aa-sdk/core`), an
+  ERC-4337 account-abstraction model: the embedded key owns a Modular Account v2 that submits a
+  sponsored UserOperation rather than the claimant paying gas. (Realizes the clarified "ERC-4337
+  Paymaster" decision; Alchemy supplies the bundler + a verifying Paymaster scoped by a Gas Manager
+  policy. The earlier "ERC-4773" was a typo.)
 - The namespace is governed by a **project-controlled registrar smart contract** that issues names
   under a single fixed postfix; this is a custom registrar rather than canonical `.eth` ENS. The
   whitelist, single-use enforcement, and registration all live in that contract. (Confirmed in

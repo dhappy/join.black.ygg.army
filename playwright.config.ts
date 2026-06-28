@@ -5,7 +5,7 @@ export default defineConfig({
 	use: {
 		baseURL: 'http://localhost:6666',
 		// 6666 is on Chromium's restricted-port list; allow it explicitly.
-		launchOptions: { args: ['--explicitly-allowed-ports=6666'] }
+		launchOptions: { args: ['--explicitly-allowed-ports=6666'] },
 	},
-	testMatch: '**/*.e2e.{ts,js}'
+	testMatch: '**/*.e2e.{ts,js}',
 })

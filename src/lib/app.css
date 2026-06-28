@@ -512,6 +512,106 @@ body {
 	text-transform: uppercase;
 	color: var(--label);
 }
+
+/* ── chain selector (in the header) ─────────────────────────────── */
+.cp-chain {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-size: 0.72rem;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: var(--label);
+}
+.cp-chain__label {
+	color: var(--label);
+}
+.cp-chain b {
+	color: var(--phosphor);
+	font-weight: 600;
+}
+.cp-chain__select {
+	appearance: none;
+	cursor: pointer;
+	font: inherit;
+	font-size: 0.72rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--bone);
+	background: var(--void);
+	border: 1px solid var(--line);
+	border-radius: 2px;
+	padding: 0.3rem 0.6rem;
+}
+.cp-chain__select:focus-visible {
+	border-color: var(--phosphor);
+	outline: none;
+	box-shadow: var(--glow-phos);
+}
+.cp-chain__select option {
+	background: var(--ash);
+	color: var(--bone);
+}
+
+/* ── admin / whitelist ──────────────────────────────────────────── */
+/* single-column, full-width console (no signature spine) */
+.cp-stage--wide {
+	grid-template-columns: minmax(0, 1fr);
+}
+.cp-textarea {
+	width: 100%;
+	resize: vertical;
+	line-height: 1.7;
+}
+.cp-select {
+	width: 100%;
+	cursor: pointer;
+	appearance: none;
+}
+.cp-select option {
+	background: var(--ash);
+	color: var(--bone);
+}
+.cp-select option:disabled {
+	color: #5d756a;
+}
+.cp-input-wrap:has(.cp-textarea) {
+	align-items: stretch;
+}
+.cp-btn:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+	box-shadow: none;
+}
+.cp-tally {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.6rem 1.8rem;
+	margin: 1.3rem 0 0;
+}
+.cp-tally div {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+}
+.cp-tally dt {
+	font-size: 0.68rem;
+	letter-spacing: 0.22em;
+	text-transform: uppercase;
+	color: var(--label);
+}
+.cp-tally dd {
+	margin: 0;
+	font-size: 1.05rem;
+	font-weight: 600;
+	color: var(--bone);
+}
+.cp-tally--ok {
+	color: var(--phosphor);
+}
+.cp-tally--bad {
+	color: var(--alarm);
+}
 .cp-success {
 	margin-top: 1.4rem;
 }

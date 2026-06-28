@@ -7,7 +7,7 @@
 		kind === 'LoadingLink' ||
 			kind === 'CheckingWhitelist' ||
 			kind === 'Submitting' ||
-			kind === 'Pending'
+			kind === 'Pending',
 	)
 </script>
 
@@ -34,6 +34,10 @@
 		<!-- check in hexagon -->
 		<path d="M12 3 L19 7 L19 17 L12 21 L5 17 L5 7 Z" />
 		<path d="M8.5 12 L11 14.5 L15.5 9.5" />
+	{:else if kind === 'MissingKey'}
+		<!-- absent key: dashed key outline -->
+		<circle cx="8" cy="8" r="4" stroke-dasharray="1.5 2" opacity="0.6" />
+		<path d="M11 11 L20 20 M17 17 L19.5 14.5 M14 14 L16 16" stroke-dasharray="1.5 2" opacity="0.6" />
 	{:else if kind === 'InvalidLink'}
 		<!-- broken link -->
 		<path d="M9 15 L7 17 a3 3 0 0 1-4-4 L5 11 M15 9 L17 7 a3 3 0 0 1 4 4 L19 13" />

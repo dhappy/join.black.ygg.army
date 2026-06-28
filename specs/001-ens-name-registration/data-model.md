@@ -28,7 +28,8 @@ Principle III).
 ### State machine
 
 ```text
-LoadingLink ──► InvalidLink            (key missing/malformed → FR-008)
+LoadingLink ──► MissingKey             (no `#k=` key in the link → FR-008)
+LoadingLink ──► InvalidLink            (key present but malformed → FR-008)
 LoadingLink ──► CheckingWhitelist
 CheckingWhitelist ──► NotAuthorized    (signer not on whitelist → FR-008)
 CheckingWhitelist ──► AlreadyRedeemed  (whitelist entry already used → FR-008, FR-013)
@@ -51,7 +52,7 @@ Accessibility: each transition moves focus to the new primary region and announc
 
 | Field | Rule | Source |
 |-------|------|--------|
-| `embeddedKey` | `k` must base64url-decode to exactly 32 bytes forming a valid secp256k1 key; else `InvalidLink`. | FR-001, FR-008 |
+| `embeddedKey` | `k` must be present (else `MissingKey`) and base64url-decode to exactly 32 bytes forming a valid secp256k1 key (else `InvalidLink`). | FR-001, FR-008 |
 | `labelInput` | Must ENSIP-15-normalize successfully; normalized form shown before submit. | FR-003 |
 | `labelNormalized` | Must be available under the postfix (registrar read) before/at submit. | FR-009 |
 | `targetAddress` | Must be a well-formed EVM address (checksum-tolerant). | FR-003 |
@@ -60,7 +61,8 @@ Accessibility: each transition moves focus to the new primary region and announc
 
 ## Error categories (distinct, actionable — FR-008, FR-012, SC-007)
 
-- `InvalidLink` — key missing or malformed.
+- `MissingKey` — no `k` key present in the link at all.
+- `InvalidLink` — key present but malformed (bad base64url / wrong length / invalid secp256k1 key).
 - `NotAuthorized` — signer not on the whitelist.
 - `AlreadyRedeemed` — whitelist entry already consumed (also the post-success reopen state).
 - `InvalidLabel` — label fails ENSIP-15 normalization.
@@ -73,10 +75,13 @@ Accessibility: each transition moves focus to the new primary region and announc
 
 ### WhitelistEntry (read)
 
+A single `uint256` per address — a role bitfield while unused, or the redeem block height once a
+claimant has been consumed. Decoded by `decodeWhitelist` (see `contracts/registrar-interface.md`).
+
 | Field | Type | Notes |
 |-------|------|-------|
-| `account` | address | The authorized signer address (key derived). |
-| `used` | bool | Whether the single allowed registration has been consumed. |
+| `account` | address | The signer address (key derived) or admin wallet. |
+| `sentinel` | uint256 | Role flags (`CLAIMANT`/`WHITELISTER`/`ADMIN`/`SUPERADMIN`) when `< 2**8`; otherwise the block height it was redeemed at (`used`). |
 
 ### ClaimedName (written)
 

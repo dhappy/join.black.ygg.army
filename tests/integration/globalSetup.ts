@@ -15,7 +15,7 @@ const VERSION = '1'
 const here = dirname(fileURLToPath(import.meta.url))
 
 const artifact = JSON.parse(
-	readFileSync(resolve(here, '../../test-contracts/out/MockRegistrar.sol/MockRegistrar.json'), 'utf8')
+	readFileSync(resolve(here, '../../test-contracts/out/MockRegistrar.sol/MockRegistrar.json'), 'utf8'),
 ) as { abi: Abi, bytecode: { object: Hex } }
 
 async function waitForRpc(): Promise<void> {
@@ -42,7 +42,7 @@ export default async function setup() {
 	const deployHash = await wallet.deployContract({
 		abi: artifact.abi,
 		bytecode: artifact.bytecode.object,
-		args: [NAME, VERSION]
+		args: [NAME, VERSION],
 	})
 	const deployReceipt = await publicClient.waitForTransactionReceipt({ hash: deployHash })
 	const registrar = deployReceipt.contractAddress as `0x${string}`
@@ -52,13 +52,17 @@ export default async function setup() {
 		address: registrar,
 		abi: artifact.abi,
 		functionName: 'allow',
-		args: [signer]
+		args: [signer],
 	})
 	await publicClient.waitForTransactionReceipt({ hash: allowHash })
 
+	// A used claimant is marked with the block height, which must sit above the role-flag byte
+	// (register() guards block.number >= 2**8). Mine past that before any register in the specs.
+	await publicClient.request({ method: 'anvil_mine', params: ['0x100'] } as never)
+
 	writeFileSync(
 		resolve(here, '.deployment.json'),
-		JSON.stringify({ rpc: RPC, registrar, name: NAME, version: VERSION, chainId: foundry.id })
+		JSON.stringify({ rpc: RPC, registrar, name: NAME, version: VERSION, chainId: foundry.id }),
 	)
 
 	return async () => {

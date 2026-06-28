@@ -2,6 +2,18 @@ import type { Address } from 'viem'
 import { publicClient } from '../chain/client'
 import { loadConfig } from '../chain/config'
 import { registrarAbi } from './abi'
+import { decodeWhitelist } from './roles'
+
+// Re-export the pure role decoder + flag constants so callers can keep importing from ./reads.
+export {
+	decodeWhitelist,
+	CLAIMANT,
+	WHITELISTER,
+	ADMIN,
+	SUPERADMIN,
+	FLAG_MASK,
+	type WhitelistStatus,
+} from './roles'
 
 // Name availability under the postfix (FR-009).
 export async function isNameAvailable(label: string): Promise<boolean> {
@@ -10,18 +22,18 @@ export async function isNameAvailable(label: string): Promise<boolean> {
 		address: cfg.registrarAddress as Address,
 		abi: registrarAbi,
 		functionName: 'available',
-		args: [label]
+		args: [label],
 	})
 }
 
-// Whitelist status for a recovered signer (FR-006): authorized + already-used flags.
-export async function readWhitelist(account: Address): Promise<{ authorized: boolean, used: boolean }> {
+// Whitelist status for an address: the recovered signer (claim flow) or the connected admin wallet.
+export async function readWhitelist(account: Address): Promise<ReturnType<typeof decodeWhitelist>> {
 	const cfg = loadConfig()
-	const [authorized, used] = await publicClient().readContract({
+	const sentinel = await publicClient().readContract({
 		address: cfg.registrarAddress as Address,
 		abi: registrarAbi,
 		functionName: 'whitelist',
-		args: [account]
+		args: [account],
 	})
-	return { authorized, used }
+	return decodeWhitelist(sentinel)
 }

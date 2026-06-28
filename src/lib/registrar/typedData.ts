@@ -5,8 +5,8 @@ import type { Address, TypedDataDomain } from 'viem'
 export const registrationTypes = {
 	Registration: [
 		{ name: 'label', type: 'string' },
-		{ name: 'target', type: 'address' }
-	]
+		{ name: 'target', type: 'address' },
+	],
 } as const
 
 export interface RegistrationDomainParams {
@@ -21,7 +21,7 @@ export function registrationDomain(params: RegistrationDomainParams): TypedDataD
 		name: params.registrarName,
 		version: params.registrarVersion,
 		chainId: params.chainId,
-		verifyingContract: params.verifyingContract
+		verifyingContract: params.verifyingContract,
 	}
 }
 

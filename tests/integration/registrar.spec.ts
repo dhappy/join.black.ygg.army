@@ -8,12 +8,13 @@ import {
 	getAddress,
 	http,
 	parseEventLogs,
-	type Address
+	type Address,
 } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { foundry } from 'viem/chains'
-import { registrarAbi } from '../../src/lib/registrar/abi'
-import { signRegistration } from '../../src/lib/registrar/sign'
+import { registrarAbi } from '$lib/registrar/abi'
+import { decodeWhitelist } from '$lib/registrar/roles'
+import { signRegistration } from '$lib/registrar/sign'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const deployment = JSON.parse(readFileSync(resolve(here, '.deployment.json'), 'utf8')) as {
@@ -43,7 +44,7 @@ function sign(privateKey: `0x${string}`, label: string) {
 		chainId: deployment.chainId,
 		verifyingContract: deployment.registrar,
 		label,
-		target: TARGET
+		target: TARGET,
 	})
 }
 
@@ -55,7 +56,7 @@ describe('MockRegistrar integration', () => {
 			address: deployment.registrar,
 			abi: registrarAbi,
 			functionName: 'register',
-			args: ['alice', TARGET, signature]
+			args: ['alice', TARGET, signature],
 		})
 		const hash = await walletClient.writeContract(request)
 		const receipt = await publicClient.waitForTransactionReceipt({ hash })
@@ -69,7 +70,7 @@ describe('MockRegistrar integration', () => {
 			address: deployment.registrar,
 			abi: registrarAbi,
 			functionName: 'available',
-			args: ['alice']
+			args: ['alice'],
 		})
 		expect(available).toBe(false)
 	})
@@ -82,8 +83,8 @@ describe('MockRegistrar integration', () => {
 				address: deployment.registrar,
 				abi: registrarAbi,
 				functionName: 'register',
-				args: ['bob', TARGET, signature]
-			})
+				args: ['bob', TARGET, signature],
+			}),
 		).rejects.toThrow(/already used/)
 	})
 
@@ -95,19 +96,21 @@ describe('MockRegistrar integration', () => {
 				address: deployment.registrar,
 				abi: registrarAbi,
 				functionName: 'register',
-				args: ['charlie', TARGET, signature]
-			})
+				args: ['charlie', TARGET, signature],
+			}),
 		).rejects.toThrow(/not whitelisted/)
 	})
 
 	it('reports whitelist status for a recovered signer', async () => {
-		const [authorized, used] = await publicClient.readContract({
+		const sentinel = await publicClient.readContract({
 			address: deployment.registrar,
 			abi: registrarAbi,
 			functionName: 'whitelist',
-			args: [privateKeyToAccount(SIGNER_KEY).address]
+			args: [privateKeyToAccount(SIGNER_KEY).address],
 		})
-		expect(authorized).toBe(true)
-		expect(used).toBe(true) // consumed by the first test
+		const status = decodeWhitelist(sentinel)
+		expect(status.authorized).toBe(true)
+		expect(status.used).toBe(true) // consumed by the first test (sentinel is now the redeem block)
+		expect(status.usedAtBlock).toBe(sentinel)
 	})
 })

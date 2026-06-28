@@ -1,14 +1,18 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { parseClaimLink, stripFragment } from '$lib/claim/link'
+	import type { Address } from 'viem'
+	import { parseClaimLink, stripFragment, type ParsedClaimLink } from '$lib/claim/link'
 	import { createClaimSession } from '$lib/claim/session.svelte'
 	import { readWhitelist } from '$lib/registrar/reads'
 	import { registerName } from '$lib/claim/register'
 	import { normalizeLabel } from '$lib/ens/normalize'
 	import { validateAddress } from '$lib/ens/address'
 	import { loadConfig } from '$lib/chain/config'
+	import { activeChainId } from '$lib/chain/active.svelte'
 	import { explorerTxUrl } from '$lib/chain/explorer'
 	import type { ClaimState, ErrorCategory } from '$lib/claim/state'
+	import Prompt from '$lib/components/Prompt.svelte'
+	import ContractStat from '$lib/components/ContractStat.svelte'
 	import StatusBanner from '$lib/components/StatusBanner.svelte'
 	import ClaimForm from '$lib/components/ClaimForm.svelte'
 	import SuccessCard from '$lib/components/SuccessCard.svelte'
@@ -18,13 +22,24 @@
 	import StateIcon from '$lib/components/StateIcon.svelte'
 
 	const session = createClaimSession()
-	let postfix = $state('')
-	let chainId = $state(0)
-	let explorerBase = $state<string | undefined>(undefined)
+	let parsed = $state<ParsedClaimLink | null>(null)
+
+	// Config is derived so a chain switch re-resolves postfix / chain id / explorer base.
+	const cfg = $derived.by(() => {
+		try {
+			return loadConfig()
+		} catch {
+			return null
+		}
+	})
+	const postfix = $derived(cfg?.postfix ?? '')
+	const chainId = $derived(cfg?.chainId ?? 1)
+	const explorerBase = $derived(cfg?.explorerUrl)
 
 	const titles: Record<ClaimState['kind'], string> = {
 		LoadingLink: 'Verifying invitation',
 		CheckingWhitelist: 'Verifying invitation',
+		MissingKey: 'No invitation key',
 		InvalidLink: 'Invalid invitation',
 		NotAuthorized: 'Not on the allow-list',
 		AlreadyRedeemed: 'Invitation spent',
@@ -32,36 +47,39 @@
 		Submitting: 'Registering',
 		Pending: 'Registering',
 		Success: 'Name claimed',
-		Failed: 'Registration failed'
+		Failed: 'Registration failed',
 	}
-	const denied = ['InvalidLink', 'NotAuthorized', 'AlreadyRedeemed', 'Failed']
+	const denied = ['MissingKey', 'InvalidLink', 'NotAuthorized', 'AlreadyRedeemed', 'Failed']
 	const tone = $derived(
-		session.state.kind === 'Success' ? 'ok' : denied.includes(session.state.kind) ? 'deny' : 'work'
+		session.state.kind === 'Success' ? 'ok' : denied.includes(session.state.kind) ? 'deny' : 'work',
 	)
 	const signer = $derived('signer' in session.state ? session.state.signer : null)
 	const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`
 
-	onMount(async () => {
-		try {
-			const cfg = loadConfig()
-			postfix = cfg.postfix
-			chainId = cfg.chainId
-			explorerBase = cfg.explorerUrl
-		} catch {
-			postfix = ''
-		}
-		const parsed = parseClaimLink(window.location.hash)
+	onMount(() => {
+		const link = parseClaimLink(window.location.hash)
 		history.replaceState(null, '', stripFragment(window.location.href))
-		session.fromLink(parsed)
-		if (parsed.ok) {
-			try {
-				const whitelist = await readWhitelist(parsed.signerAddress)
-				session.resolveWhitelist(parsed.signerAddress, whitelist)
-			} catch {
-				session.failed(parsed.signerAddress, 'SubmissionFailed')
-			}
-		}
+		parsed = link
 	})
+
+	// Resolve the link against the active chain, and re-resolve on a chain switch — the same signer
+	// may be whitelisted on one deployment but not another.
+	$effect(() => {
+		activeChainId() // dependency: re-run when the target chain changes
+		const link = parsed
+		if(!link) return
+		session.fromLink(link)
+		if(link.ok) void resolve(link.signerAddress)
+	})
+
+	async function resolve(signerAddress: Address) {
+		try {
+			const whitelist = await readWhitelist(signerAddress)
+			session.resolveWhitelist(signerAddress, whitelist)
+		} catch {
+			session.failed(signerAddress, 'SubmissionFailed')
+		}
+	}
 
 	async function submit(label: string, address: string) {
 		const current = session.state
@@ -76,7 +94,7 @@
 			const result = await registerName({
 				privateKey: key,
 				label: normalized.normalized,
-				target: target.address
+				target: target.address,
 			})
 			session.succeeded(result.fqName, target.address, result.txHash)
 		} catch (error) {
@@ -87,15 +105,7 @@
 	}
 </script>
 
-<header class="cp-prompt">
-	<svg class="cp-prompt__sigil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
-		<path d="M3 21 L21 3 M14 3 L21 3 L21 10" />
-		<circle cx="7.5" cy="16.5" r="3.5" />
-	</svg>
-	<span class="cp-prompt__path">join.<b>{postfix || 'black.ygg.army'}</b></span>
-	<span class="cp-prompt__spacer"></span>
-	<span class="cp-prompt__meta">one-time claim</span>
-</header>
+<Prompt {postfix} meta="one-time claim" />
 
 <main class="cp-stage">
 	<div class="cp-spine">
@@ -112,7 +122,7 @@
 
 		{#if session.state.kind === 'LoadingLink' || session.state.kind === 'CheckingWhitelist'}
 			<p class="cp-working">Reading the invitation key…</p>
-		{:else if session.state.kind === 'InvalidLink' || session.state.kind === 'NotAuthorized' || session.state.kind === 'AlreadyRedeemed'}
+		{:else if session.state.kind === 'MissingKey' || session.state.kind === 'InvalidLink' || session.state.kind === 'NotAuthorized' || session.state.kind === 'AlreadyRedeemed'}
 			<LinkState state={session.state} />
 		{:else if session.state.kind === 'Ready'}
 			<p class="cp-body">
@@ -136,6 +146,7 @@
 	<StatusBanner state={session.state} />
 	<span class="cp-prompt__spacer"></span>
 	{#if signer}<span class="cp-stat">signer <b>{short(signer)}</b></span>{/if}
+	<ContractStat />
 	<span class="cp-stat">chain <b>{chainId || '—'}</b></span>
 	<span class="cp-stat cp-stat--gas">gas <b>sponsored</b></span>
 </footer>

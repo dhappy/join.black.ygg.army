@@ -1,40 +1,13 @@
-import { env } from '$env/dynamic/public'
+import { activeChainId } from './active.svelte'
+import { alchemyApiKey, chainConfig, type ChainConfig } from './chains'
 
-// Public, build-time configuration. Never put secrets here — everything is shipped to the client.
-export interface AppConfig {
-	chainId: number
-	rpcUrl: string
-	registrarAddress: string
-	postfix: string
-	registrarName: string
-	registrarVersion: string
-	explorerUrl?: string
-}
-
-const REQUIRED_KEYS = [
-	'PUBLIC_CHAIN_ID',
-	'PUBLIC_RPC_URL',
-	'PUBLIC_REGISTRAR_ADDRESS',
-	'PUBLIC_POSTFIX',
-	'PUBLIC_REGISTRAR_NAME',
-	'PUBLIC_REGISTRAR_VERSION'
-] as const
-
-export function missingConfigKeys(): string[] {
-	return REQUIRED_KEYS.filter((key) => !env[key])
+// The resolved config for the chain the UI is currently targeting, plus the shared Alchemy key.
+// Re-resolves on every call, so a chain switch in the UI immediately changes what reads/writes hit.
+export interface AppConfig extends ChainConfig {
+	alchemyApiKey?: string
 }
 
 export function loadConfig(): AppConfig {
-	const missing = missingConfigKeys()
-	if (missing.length > 0) throw new Error(`Missing required public config: ${missing.join(', ')}`)
-	// Safe: loadConfig throws above if any required key is missing.
-	return {
-		chainId: Number(env.PUBLIC_CHAIN_ID),
-		rpcUrl: env.PUBLIC_RPC_URL!,
-		registrarAddress: env.PUBLIC_REGISTRAR_ADDRESS!,
-		postfix: env.PUBLIC_POSTFIX!,
-		registrarName: env.PUBLIC_REGISTRAR_NAME!,
-		registrarVersion: env.PUBLIC_REGISTRAR_VERSION!,
-		explorerUrl: env.PUBLIC_EXPLORER_URL || undefined
-	}
+	const chain = chainConfig(activeChainId())
+	return { ...chain, alchemyApiKey: alchemyApiKey() }
 }

@@ -13,7 +13,7 @@
 					kind === 'AlreadyRedeemed' ||
 					kind === 'Failed'
 				? 'deny'
-				: 'work'
+				: 'work',
 	)
 </script>
 

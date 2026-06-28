@@ -6,6 +6,7 @@
 	const messages: Record<ClaimState['kind'], string> = {
 		LoadingLink: 'Checking your invitation…',
 		CheckingWhitelist: 'Verifying your invitation…',
+		MissingKey: 'No invitation key in this link.',
 		InvalidLink: 'This invitation link is invalid.',
 		NotAuthorized: 'This link is not authorized.',
 		AlreadyRedeemed: 'This invitation has already been used.',
@@ -13,7 +14,7 @@
 		Submitting: 'Submitting your registration…',
 		Pending: 'Waiting for confirmation…',
 		Success: 'Your name is registered.',
-		Failed: 'Something went wrong.'
+		Failed: 'Something went wrong.',
 	}
 </script>
 

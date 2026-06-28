@@ -18,7 +18,7 @@ export async function signRegistration(params: SignRegistrationParams): Promise<
 		domain: registrationDomain(params),
 		types: registrationTypes,
 		primaryType: 'Registration',
-		message: { label: params.label, target: params.target }
+		message: { label: params.label, target: params.target },
 	})
 }
 
@@ -26,6 +26,6 @@ export function encodeRegisterCall(label: string, target: Address, signature: He
 	return encodeFunctionData({
 		abi: registrarAbi,
 		functionName: 'register',
-		args: [label, target, signature]
+		args: [label, target, signature],
 	})
 }
