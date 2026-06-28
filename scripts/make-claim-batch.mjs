@@ -2,29 +2,50 @@
 
 // Generate a batch of one-time claim links + QR codes for distribution.
 //
-// Creates a timestamp-named directory containing:
+// Creates a timestamp-named directory `invites.YYYY⁄MM⁄DD@HH:MM:SS.mmmZ/` containing:
 //   addresses.txt      — the n signer addresses (paste into /whitelist → bulkWhitelist)
 //   links.txt          — the n claim URLs (each embeds a private key in its #fragment)
 //   qr/<i>-<address>.svg — n QR codes (error-correction level Q ≈ 25%) of those links
 // Line i of addresses.txt ↔ line i of links.txt ↔ the i-th QR file.
 //
 // Usage:
-//   node scripts/make-claim-batch.mjs                 # 16 (default)
-//   node scripts/make-claim-batch.mjs 50              # 50
-//   BASE_URL=https://join.black.ygg.army OUT_DIR=./claims node scripts/make-claim-batch.mjs 16
+//   node scripts/make-claim-batch.mjs                              # 16, base http://localhost:4173
+//   node scripts/make-claim-batch.mjs -n 50                        # 50
+//   node scripts/make-claim-batch.mjs --count 50 --base join.black.ygg.army   # https:// added
+//   OUT_DIR=./claims node scripts/make-claim-batch.mjs --base https://join.black.ygg.army
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { hexToBytes } from 'viem'
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
 import QRCode from 'qrcode'
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
 
-const n = Number.parseInt(process.argv[2] ?? '16', 10)
+const argv = yargs(hideBin(process.argv))
+	.scriptName('make-claim-batch')
+	.option('count', {
+		alias: 'n',
+		type: 'number',
+		default: 16,
+		describe: 'how many claim sets to generate',
+	})
+	.option('base', {
+		alias: 'b',
+		type: 'string',
+		default: process.env.BASE_URL ?? 'http://localhost:4173',
+		describe: 'base URL the links point at (a bare hostname gets https:// added)',
+	})
+	.strict()
+	.parseSync()
+
+const n = argv.count
 if (!Number.isInteger(n) || n < 1) {
-	console.error(`error: n must be a positive integer (got "${process.argv[2]}")`)
+	console.error(`error: --count must be a positive integer (got "${argv.count}")`)
 	process.exit(1)
 }
 
-const baseUrl = (process.env.BASE_URL ?? 'http://localhost:4173').replace(/\/+$/, '')
+// A bare hostname (no scheme) gets https://; trailing slashes trimmed.
+const baseUrl = (argv.base.includes('://') ? argv.base : `https://${argv.base}`).replace(/\/+$/, '')
 const outParent = process.env.OUT_DIR ?? '.'
 
 function toBase64Url(bytes) {
@@ -62,4 +83,4 @@ console.log(`Wrote ${n} claim set(s) to ${dir}/`)
 console.log('  addresses.txt — whitelist these (paste into /whitelist → bulkWhitelist)')
 console.log('  links.txt     — distribute one per claimant (each embeds its key)')
 console.log(`  qr/           — ${n} QR codes (error correction Q ≈ 25%) of the links`)
-console.log(`base URL: ${baseUrl}  (override with BASE_URL=…)`)
+console.log(`base URL: ${baseUrl}`)

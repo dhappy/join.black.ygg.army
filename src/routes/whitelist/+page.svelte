@@ -7,6 +7,8 @@
 	import { runAction } from '$lib/admin/whitelist'
 	import { canPerform, WHITELIST_ACTIONS, type WhitelistAction } from '$lib/admin/actions'
 	import { readWhitelist, type WhitelistStatus } from '$lib/registrar/reads'
+	import Prompt from '$lib/components/Prompt.svelte'
+	import ContractStat from '$lib/components/ContractStat.svelte'
 	import WhitelistForm from '$lib/components/WhitelistForm.svelte'
 
 	type Phase = 'idle' | 'connecting' | 'ready' | 'submitting' | 'done' | 'error'
@@ -112,15 +114,7 @@
 	}
 </script>
 
-<header class="cp-prompt">
-	<svg class="cp-prompt__sigil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
-		<path d="M3 21 L21 3 M14 3 L21 3 L21 10" />
-		<circle cx="7.5" cy="16.5" r="3.5" />
-	</svg>
-	<span class="cp-prompt__path">join.<b>{postfix || 'black.ygg.army'}</b></span>
-	<span class="cp-prompt__spacer"></span>
-	<span class="cp-prompt__meta">admin // roles</span>
-</header>
+<Prompt {postfix} meta="admin // roles" />
 
 <main class="cp-stage cp-stage--wide">
 	<section class="cp-console">
@@ -214,6 +208,7 @@
 	<span class="cp-stat">mode <b>admin</b></span>
 	<span class="cp-prompt__spacer"></span>
 	{#if connection}<span class="cp-stat">wallet <b>{short(connection.account)}</b></span>{/if}
+	<ContractStat />
 	<span class="cp-stat">chain <b>{chainId || '—'}</b></span>
 	<span class="cp-stat cp-stat--gas">gas <b>self-paid</b></span>
 </footer>

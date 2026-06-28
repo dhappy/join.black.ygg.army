@@ -12,9 +12,18 @@ const EXPLORERS: Record<number, string> = {
 	80002: 'https://amoy.polygonscan.com',
 }
 
-// Build a transaction URL on the appropriate explorer for `chainId`, or null when unknown. An
-// explicit `override` base (PUBLIC_EXPLORER_URL) takes precedence over the built-in map.
+// The explorer base for `chainId`, or null when unknown. An explicit `override` (PUBLIC explorerUrl)
+// takes precedence over the built-in map.
+function explorerBase(chainId: number, override?: string): string | null {
+	return (override || EXPLORERS[chainId])?.replace(/\/+$/, '') ?? null
+}
+
 export function explorerTxUrl(chainId: number, txHash: string, override?: string): string | null {
-	const base = (override || EXPLORERS[chainId])?.replace(/\/+$/, '')
+	const base = explorerBase(chainId, override)
 	return base ? `${base}/tx/${txHash}` : null
+}
+
+export function explorerAddressUrl(chainId: number, address: string, override?: string): string | null {
+	const base = explorerBase(chainId, override)
+	return base ? `${base}/address/${address}` : null
 }

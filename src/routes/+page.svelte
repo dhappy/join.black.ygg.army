@@ -11,6 +11,8 @@
 	import { activeChainId } from '$lib/chain/active.svelte'
 	import { explorerTxUrl } from '$lib/chain/explorer'
 	import type { ClaimState, ErrorCategory } from '$lib/claim/state'
+	import Prompt from '$lib/components/Prompt.svelte'
+	import ContractStat from '$lib/components/ContractStat.svelte'
 	import StatusBanner from '$lib/components/StatusBanner.svelte'
 	import ClaimForm from '$lib/components/ClaimForm.svelte'
 	import SuccessCard from '$lib/components/SuccessCard.svelte'
@@ -103,15 +105,7 @@
 	}
 </script>
 
-<header class="cp-prompt">
-	<svg class="cp-prompt__sigil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
-		<path d="M3 21 L21 3 M14 3 L21 3 L21 10" />
-		<circle cx="7.5" cy="16.5" r="3.5" />
-	</svg>
-	<span class="cp-prompt__path">join.<b>{postfix || 'black.ygg.army'}</b></span>
-	<span class="cp-prompt__spacer"></span>
-	<span class="cp-prompt__meta">one-time claim</span>
-</header>
+<Prompt {postfix} meta="one-time claim" />
 
 <main class="cp-stage">
 	<div class="cp-spine">
@@ -152,6 +146,7 @@
 	<StatusBanner state={session.state} />
 	<span class="cp-prompt__spacer"></span>
 	{#if signer}<span class="cp-stat">signer <b>{short(signer)}</b></span>{/if}
+	<ContractStat />
 	<span class="cp-stat">chain <b>{chainId || '—'}</b></span>
 	<span class="cp-stat cp-stat--gas">gas <b>sponsored</b></span>
 </footer>
