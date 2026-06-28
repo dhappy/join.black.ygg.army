@@ -5,7 +5,6 @@
 	import { loadConfig } from '$lib/chain/config'
 	import { initActiveChain } from '$lib/chain/active.svelte'
 	import Backdrop from '$lib/components/Backdrop.svelte'
-	import ChainSelector from '$lib/components/ChainSelector.svelte'
 
 	let { children } = $props()
 
@@ -30,6 +29,5 @@
 <Backdrop />
 <div class="cp-scanlines" aria-hidden="true"></div>
 <div class="cp-app">
-	<div class="cp-chainbar"><ChainSelector /></div>
 	{@render children()}
 </div>

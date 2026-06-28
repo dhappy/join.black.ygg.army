@@ -513,12 +513,7 @@ body {
 	color: var(--label);
 }
 
-/* ── chain selector bar ─────────────────────────────────────────── */
-.cp-chainbar {
-	display: flex;
-	justify-content: flex-end;
-	margin-bottom: -0.5rem;
-}
+/* ── chain selector (in the header) ─────────────────────────────── */
 .cp-chain {
 	display: inline-flex;
 	align-items: center;

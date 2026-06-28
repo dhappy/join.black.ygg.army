@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths'
+	import ChainSelector from './ChainSelector.svelte'
 
 	let { postfix, meta }: { postfix: string, meta: string } = $props()
 </script>
@@ -12,6 +13,7 @@
 	<span class="cp-prompt__path"><a href={resolve('/')}>join</a>.<b>{postfix || 'black.ygg.army'}</b></span>
 	<span class="cp-prompt__spacer"></span>
 	<span class="cp-prompt__meta">{meta}</span>
+	<ChainSelector />
 </header>
 
 <style>

@@ -7,6 +7,9 @@
 		"node": ">=22"
 	},
 	"pnpm": {
+		"overrides": {
+			"js-cookie": "^3.0.7"
+		},
 		"auditConfig": {
 			"ignoreGhsas": [
 				"GHSA-96hv-2xvq-fx4p"
