@@ -121,8 +121,14 @@ if [[ -n "${SALT:-}" ]]; then
 	else
 		echo "CREATE2 → ${REGISTRAR}"
 		cast send "$DETERMINISTIC_DEPLOYER" "${SALT}${INITCODE#0x}" --rpc-url "$RPC_URL" "${SIGNER[@]}" >/dev/null
-		DEPLOYED="$(cast code "$REGISTRAR" --rpc-url "$RPC_URL")"
-		[[ "$DEPLOYED" != "0x" && -n "$DEPLOYED" ]] || { echo "error: CREATE2 produced no code at ${REGISTRAR}" >&2; exit 1; }
+		# Poll for the code — a wallet RPC (e.g. Frame) can return before the new state is queryable.
+		DEPLOYED="0x"
+		for _ in $(seq 1 30); do
+			DEPLOYED="$(cast code "$REGISTRAR" --rpc-url "$RPC_URL")"
+			[[ "$DEPLOYED" != "0x" && -n "$DEPLOYED" ]] && break
+			sleep 2
+		done
+		[[ "$DEPLOYED" != "0x" && -n "$DEPLOYED" ]] || { echo "error: CREATE2 produced no code at ${REGISTRAR} after waiting" >&2; exit 1; }
 	fi
 else
 	OUT="$(forge create "$CONTRACT" \

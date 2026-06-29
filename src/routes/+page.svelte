@@ -64,6 +64,8 @@
 
 	// Resolve the link against the active chain, and re-resolve on a chain switch — the same signer
 	// may be whitelisted on one deployment but not another.
+	let resolveGen = 0
+
 	$effect(() => {
 		activeChainId() // dependency: re-run when the target chain changes
 		const link = parsed
@@ -72,12 +74,15 @@
 		if(link.ok) void resolve(link.signerAddress)
 	})
 
+	// Only the latest resolution applies, so a slow read on a previously-selected chain can't
+	// clobber the current chain's result (e.g. default Sepolia read landing after a restored Mainnet).
 	async function resolve(signerAddress: Address) {
+		const gen = ++resolveGen
 		try {
 			const whitelist = await readWhitelist(signerAddress)
-			session.resolveWhitelist(signerAddress, whitelist)
+			if(gen === resolveGen) session.resolveWhitelist(signerAddress, whitelist)
 		} catch {
-			session.failed(signerAddress, 'SubmissionFailed')
+			if(gen === resolveGen) session.failed(signerAddress, 'SubmissionFailed')
 		}
 	}
 

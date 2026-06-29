@@ -7,7 +7,7 @@ resolve_network() {
 	case "$NETWORK" in
 		base-sepolia) rpc="https://sepolia.base.org"; explorer="https://sepolia.basescan.org"; mainnet=0; chainid=84532 ;;
 		base)         rpc="https://mainnet.base.org"; explorer="https://basescan.org"; mainnet=1; chainid=8453 ;;
-		mainnet|ethereum) rpc="https://eth.llamarpc.com"; explorer="https://etherscan.io"; mainnet=1; chainid=1 ;;
+		mainnet|ethereum) rpc="https://ethereum-rpc.publicnode.com"; explorer="https://etherscan.io"; mainnet=1; chainid=1 ;;
 		sepolia)      rpc="https://ethereum-sepolia-rpc.publicnode.com"; explorer="https://sepolia.etherscan.io"; mainnet=0; chainid=11155111 ;;
 		optimism)     rpc="https://mainnet.optimism.io"; explorer="https://optimistic.etherscan.io"; mainnet=1; chainid=10 ;;
 		op-sepolia)   rpc="https://sepolia.optimism.io"; explorer="https://sepolia-optimism.etherscan.io"; mainnet=0; chainid=11155420 ;;
@@ -45,6 +45,7 @@ resolve_registrar() {
 			if [[ -z "${ENS_RESOLVER:-}" ]]; then
 				case "${NETWORK:-}" in
 					sepolia) ENS_RESOLVER="0xE99638b40E4Fff0129D56f03b55b6bbC4BBE49b5" ;;
+					mainnet|ethereum) ENS_RESOLVER="0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63" ;;
 				esac
 			fi
 			if [[ -z "${ENS_RESOLVER:-}" ]]; then
