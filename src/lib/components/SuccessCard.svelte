@@ -10,7 +10,11 @@
 </script>
 
 <section class="cp-success" role="status" aria-live="polite">
-	<p class="cp-resolves"><strong>{fqName}</strong> resolves to <code>{target}</code></p>
+	<p class="cp-resolves">
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve external ENS app URL, not a SvelteKit route -->
+		<strong><a href="https://app.ens.domains/{fqName}" target="_blank" rel="noopener noreferrer">{fqName}</a></strong>
+		resolves to <code>{target}</code>
+	</p>
 	<div class="cp-tx">
 		<span>Transaction</span>
 		{#if explorerUrl}
@@ -21,3 +25,14 @@
 		{/if}
 	</div>
 </section>
+
+<style>
+	.cp-resolves a {
+		color: var(--phosphor);
+		text-decoration: none;
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+</style>
