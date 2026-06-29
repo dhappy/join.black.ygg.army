@@ -13,8 +13,8 @@ export interface ChainConfig {
 	gasPolicyId?: string
 }
 
-// Ethereum Sepolia — the default target (real ENS is on L1; Sepolia is its testnet).
-export const DEFAULT_CHAIN_ID = 11155111
+// Ethereum mainnet — the default target (real ENS is on L1).
+export const DEFAULT_CHAIN_ID = 1
 
 const KNOWN_LABELS: Record<number, string> = {
 	1: 'Ethereum',
@@ -83,15 +83,15 @@ export function chainConfig(chainId: number): ChainConfig {
 	return chain
 }
 
-// Pure pick: the preferred chain if it's configured, else Sepolia if present, else the first
-// configured chain (else Sepolia as a last resort). Exposed for unit testing.
+// Pure pick: the preferred chain if it's configured, else Ethereum mainnet if present, else the
+// first configured chain (else Ethereum mainnet as a last resort). Exposed for unit testing.
 export function pickDefaultChainId(chainIds: number[], preferred?: number): number {
 	if (preferred && chainIds.includes(preferred)) return preferred
 	if (chainIds.includes(DEFAULT_CHAIN_ID)) return DEFAULT_CHAIN_ID
 	return chainIds[0] ?? DEFAULT_CHAIN_ID
 }
 
-// The chain selected by default: PUBLIC_DEFAULT_CHAIN_ID if configured, else Sepolia, else first.
+// The chain selected by default: PUBLIC_DEFAULT_CHAIN_ID if configured, else Ethereum mainnet, else first.
 export function defaultChainId(): number {
 	const ids = listChains().map(({ chainId }) => chainId)
 	return pickDefaultChainId(ids, Number(env.PUBLIC_DEFAULT_CHAIN_ID) || undefined)

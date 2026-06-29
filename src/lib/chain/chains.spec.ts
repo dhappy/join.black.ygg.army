@@ -6,16 +6,16 @@ describe('pickDefaultChainId', () => {
 		expect(pickDefaultChainId([1, 11155111, 8453], 8453)).toBe(8453)
 	})
 
-	it('falls back to Sepolia when the preferred chain is absent', () => {
+	it('falls back to Ethereum mainnet when the preferred chain is absent', () => {
 		expect(pickDefaultChainId([1, 11155111], 999)).toBe(DEFAULT_CHAIN_ID)
 		expect(pickDefaultChainId([1, 11155111])).toBe(DEFAULT_CHAIN_ID)
 	})
 
-	it('falls back to the first configured chain when Sepolia is absent', () => {
-		expect(pickDefaultChainId([1, 8453])).toBe(1)
+	it('falls back to the first configured chain when Ethereum mainnet is absent', () => {
+		expect(pickDefaultChainId([11155111, 8453])).toBe(11155111)
 	})
 
-	it('returns Sepolia as a last resort when nothing is configured', () => {
+	it('returns Ethereum mainnet as a last resort when nothing is configured', () => {
 		expect(pickDefaultChainId([])).toBe(DEFAULT_CHAIN_ID)
 	})
 })
